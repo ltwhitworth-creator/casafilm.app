@@ -14,7 +14,8 @@ export default function Login() {
     if (error) {
       setMessage(error.message)
     } else {
-      setMessage('Logged in successfully! Redirecting...')
+     setMessage('Logged in successfully! Redirecting...')
+window.location.href = '/dashboard'
     }
     setLoading(false)
   }
