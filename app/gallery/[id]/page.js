@@ -102,16 +102,22 @@ export default function GalleryPage(props) {
           </div>
         </div>
 
-        <div style={{ background: '#111', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '40px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', border: '1.5px solid rgba(181,135,74,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#b5874a', fontSize: '20px', paddingLeft: '4px' }}>
-              ▶
-            </div>
+        {gallery.video_uid ? (
+          <div style={{ marginBottom: '40px', position: 'relative', paddingTop: '56.25%' }}>
+            <iframe
+              src={`https://iframe.cloudflarestream.com/${gallery.video_uid}`}
+              style={{ border: 'none', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <div style={{ background: '#111', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '40px' }}>
             <p style={{ fontFamily: 'monospace', fontSize: '10px', color: '#444', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-              Video player coming soon
+              No video uploaded yet
             </p>
           </div>
-        </div>
+        )}
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 0', borderTop: '1px solid #222', borderBottom: '1px solid #222' }}>
           <div>

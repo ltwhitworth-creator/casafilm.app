@@ -6,19 +6,84 @@ export default function NewGallery() {
   const [name, setName] = useState('')
   const [clientName, setClientName] = useState('')
   const [password, setPassword] = useState('')
+  const [video, setVideo] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [uploadStage, setUploadStage] = useState('')
   const [message, setMessage] = useState('')
 
   async function handleCreate() {
+    if (!name || !clientName || !password) {
+      setMessage('Please fill in all fields')
+      return
+    }
+
     setLoading(true)
     setMessage('')
 
     const { data: { session } } = await supabase.auth.getSession()
-
     if (!session) {
       window.location.href = '/login'
       return
     }
+
+    let videoUid = null
+
+    if (video) {
+      try {
+        setUploadStage('Preparing upload...')
+        setProgress(0)
+
+        const tokenRes = await fetch('/api/upload', { method: 'POST' })
+        const tokenData = await tokenRes.json()
+
+        if (tokenData.error) {
+          setMessage('Failed to prepare upload — ' + tokenData.error)
+          setLoading(false)
+          return
+        }
+
+        videoUid = tokenData.uid
+        const uploadUrl = tokenData.uploadUrl
+
+        setUploadStage('Uploading video...')
+
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+
+          xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              const percent = Math.round((e.loaded / e.total) * 100)
+              setProgress(percent)
+            }
+          })
+
+          xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              setProgress(100)
+              setUploadStage('Video uploaded!')
+              resolve()
+            } else {
+              reject(new Error('Upload failed with status ' + xhr.status))
+            }
+          })
+
+          xhr.addEventListener('error', () => reject(new Error('Network error during upload')))
+
+          const formData = new FormData()
+          formData.append('file', video)
+          xhr.open('POST', uploadUrl)
+          xhr.send(formData)
+        })
+
+      } catch (err) {
+        setMessage('Video upload failed — ' + err.message)
+        setLoading(false)
+        return
+      }
+    }
+
+    setUploadStage('Creating gallery...')
 
     const { error } = await supabase
       .from('galleries')
@@ -26,22 +91,22 @@ export default function NewGallery() {
         name,
         client_name: clientName,
         password,
-        user_id: session.user.id
+        user_id: session.user.id,
+        video_uid: videoUid
       })
 
     if (error) {
       setMessage('Something went wrong — ' + error.message)
+      setLoading(false)
     } else {
       window.location.href = '/dashboard'
     }
-
-    setLoading(false)
   }
 
   return (
     <div style={{ maxWidth: '520px', margin: '100px auto', padding: '40px' }}>
       <a href="/dashboard" style={{ fontFamily: 'monospace', fontSize: '12px', color: '#888', textDecoration: 'none', letterSpacing: '0.1em' }}>
-        ← Back to dashboard
+        Back to dashboard
       </a>
 
       <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: '400', margin: '32px 0 8px' }}>
@@ -56,7 +121,7 @@ export default function NewGallery() {
       </label>
       <input
         type="text"
-        placeholder="e.g. Sarah & James Wedding Film"
+        placeholder="e.g. Sarah and James Wedding Film"
         value={name}
         onChange={e => setName(e.target.value)}
         style={{ width: '100%', padding: '14px', marginBottom: '24px', fontSize: '15px', border: '1px solid #ddd', outline: 'none', fontFamily: 'inherit' }}
@@ -67,7 +132,7 @@ export default function NewGallery() {
       </label>
       <input
         type="text"
-        placeholder="e.g. Sarah & James"
+        placeholder="e.g. Sarah and James"
         value={clientName}
         onChange={e => setClientName(e.target.value)}
         style={{ width: '100%', padding: '14px', marginBottom: '24px', fontSize: '15px', border: '1px solid #ddd', outline: 'none', fontFamily: 'inherit' }}
@@ -83,19 +148,52 @@ export default function NewGallery() {
         onChange={e => setPassword(e.target.value)}
         style={{ width: '100%', padding: '14px', marginBottom: '8px', fontSize: '15px', border: '1px solid #ddd', outline: 'none', fontFamily: 'inherit' }}
       />
-      <p style={{ fontFamily: 'monospace', fontSize: '11px', color: '#aaa', marginBottom: '40px', letterSpacing: '0.05em' }}>
+      <p style={{ fontFamily: 'monospace', fontSize: '11px', color: '#aaa', marginBottom: '32px', letterSpacing: '0.05em' }}>
         Your client will use this to access their gallery
       </p>
+
+      <label style={{ display: 'block', fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
+        Video file (optional)
+      </label>
+      <input
+        type="file"
+        accept="video/*"
+        onChange={e => setVideo(e.target.files[0])}
+        style={{ width: '100%', padding: '14px', marginBottom: '8px', fontSize: '14px', border: '1px solid #ddd', fontFamily: 'inherit', background: '#fafafa' }}
+      />
+      <p style={{ fontFamily: 'monospace', fontSize: '11px', color: '#aaa', marginBottom: '40px', letterSpacing: '0.05em' }}>
+        You can also add videos after creating the gallery
+      </p>
+
+      {loading && video && (
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#888', letterSpacing: '0.1em' }}>
+              {uploadStage}
+            </span>
+            <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#b5874a', fontWeight: '500' }}>
+              {progress}%
+            </span>
+          </div>
+          <div style={{ width: '100%', height: '4px', background: '#eee', borderRadius: '2px' }}>
+            <div style={{ width: `${progress}%`, height: '100%', background: '#b5874a', borderRadius: '2px', transition: 'width 0.3s ease' }}></div>
+          </div>
+        </div>
+      )}
 
       <button
         onClick={handleCreate}
         disabled={loading || !name || !clientName || !password}
-        style={{ width: '100%', padding: '16px', background: loading ? '#888' : '#1a1410', color: '#f0e8d8', border: 'none', cursor: 'pointer', fontSize: '13px', fontFamily: 'monospace', letterSpacing: '0.15em', textTransform: 'uppercase' }}
+        style={{ width: '100%', padding: '16px', background: loading ? '#888' : '#1a1410', color: '#f0e8d8', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '13px', fontFamily: 'monospace', letterSpacing: '0.15em', textTransform: 'uppercase' }}
       >
-        {loading ? 'Creating...' : 'Create Gallery'}
+        {loading ? 'Please wait...' : 'Create Gallery'}
       </button>
 
-      {message && <p style={{ marginTop: '20px', color: '#c0392b', fontFamily: 'monospace', fontSize: '12px' }}>{message}</p>}
+      {message && (
+        <p style={{ marginTop: '20px', color: '#c0392b', fontFamily: 'monospace', fontSize: '12px' }}>
+          {message}
+        </p>
+      )}
     </div>
   )
 }
