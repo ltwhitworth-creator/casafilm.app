@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Upload } from 'tus-js-client'
 import { supabase } from '../../lib/supabase'
 
 export default function NewGallery() {
@@ -31,49 +32,41 @@ export default function NewGallery() {
 
     if (video) {
       try {
-        setUploadStage('Preparing upload...')
+        setUploadStage('Uploading video...')
         setProgress(0)
 
-        const tokenRes = await fetch('/api/upload', { method: 'POST' })
-        const tokenData = await tokenRes.json()
+        videoUid = await new Promise((resolve, reject) => {
+          let capturedUid = null
 
-        if (tokenData.error) {
-          setMessage('Failed to prepare upload — ' + tokenData.error)
-          setLoading(false)
-          return
-        }
-
-        videoUid = tokenData.uid
-        const uploadUrl = tokenData.uploadUrl
-
-        setUploadStage('Uploading video...')
-
-        await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest()
-
-          xhr.upload.addEventListener('progress', (e) => {
-            if (e.lengthComputable) {
-              const percent = Math.round((e.loaded / e.total) * 100)
+          const upload = new Upload(video, {
+            // Point at our own API — tus-js-client never touches Cloudflare directly
+            endpoint: '/api/upload',
+            chunkSize: 50 * 1024 * 1024, // 50 MB chunks
+            retryDelays: [0, 3000, 5000, 10000, 20000],
+            metadata: {
+              filename: video.name,
+              filetype: video.type,
+            },
+            // Capture the video UID from the creation response header
+            onAfterResponse(req, res) {
+              const mediaId = res.getHeader('Stream-Media-Id')
+              if (mediaId) capturedUid = mediaId
+            },
+            onProgress(bytesUploaded, bytesTotal) {
+              const percent = Math.round((bytesUploaded / bytesTotal) * 100)
               setProgress(percent)
-            }
-          })
-
-          xhr.addEventListener('load', () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
+            },
+            onSuccess() {
               setProgress(100)
               setUploadStage('Video uploaded!')
-              resolve()
-            } else {
-              reject(new Error('Upload failed with status ' + xhr.status))
-            }
+              resolve(capturedUid)
+            },
+            onError(error) {
+              reject(error)
+            },
           })
 
-          xhr.addEventListener('error', () => reject(new Error('Network error during upload')))
-
-          const formData = new FormData()
-          formData.append('file', video)
-          xhr.open('POST', uploadUrl)
-          xhr.send(formData)
+          upload.start()
         })
 
       } catch (err) {
