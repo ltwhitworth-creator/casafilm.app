@@ -14,7 +14,7 @@ export default function NewGallery() {
   const [message, setMessage] = useState('')
 
   async function handleCreate() {
-    if (!name || !clientName || !password) {
+    if (!name || !clientName) {
       setMessage('Please fill in all fields')
       return
     }
@@ -83,7 +83,7 @@ export default function NewGallery() {
       .insert({
         name,
         client_name: clientName,
-        password,
+        password: password || null,
         user_id: session.user.id,
         video_uid: videoUid
       })
@@ -132,7 +132,7 @@ export default function NewGallery() {
       />
 
       <label style={{ display: 'block', fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
-        Client password
+        Client password <span style={{ color: '#bbb', textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
       </label>
       <input
         type="text"
@@ -142,7 +142,7 @@ export default function NewGallery() {
         style={{ width: '100%', padding: '14px', marginBottom: '8px', fontSize: '15px', border: '1px solid #ddd', outline: 'none', fontFamily: 'inherit' }}
       />
       <p style={{ fontFamily: 'monospace', fontSize: '11px', color: '#aaa', marginBottom: '32px', letterSpacing: '0.05em' }}>
-        Your client will use this to access their gallery
+        Leave blank to make the gallery publicly accessible
       </p>
 
       <label style={{ display: 'block', fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
@@ -176,7 +176,7 @@ export default function NewGallery() {
 
       <button
         onClick={handleCreate}
-        disabled={loading || !name || !clientName || !password}
+        disabled={loading || !name || !clientName}
         style={{ width: '100%', padding: '16px', background: loading ? '#888' : '#1a1410', color: '#f0e8d8', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '13px', fontFamily: 'monospace', letterSpacing: '0.15em', textTransform: 'uppercase' }}
       >
         {loading ? 'Please wait...' : 'Create Gallery'}

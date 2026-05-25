@@ -6,6 +6,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null)
   const [galleries, setGalleries] = useState([])
   const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(null)
 
   useEffect(() => {
     async function getData() {
@@ -29,6 +30,21 @@ export default function Dashboard() {
   async function handleLogout() {
     await supabase.auth.signOut()
     window.location.href = '/login'
+  }
+
+  async function handleDelete(gallery) {
+    if (!confirm(`Delete "${gallery.name}"? This cannot be undone.`)) return
+
+    setDeleting(gallery.id)
+    try {
+      if (gallery.video_uid) {
+        await fetch(`/api/stream/${gallery.video_uid}`, { method: 'DELETE' })
+      }
+      await supabase.from('galleries').delete().eq('id', gallery.id)
+      setGalleries(prev => prev.filter(g => g.id !== gallery.id))
+    } finally {
+      setDeleting(null)
+    }
   }
 
   if (loading) return <p style={{ padding: '40px' }}>Loading...</p>
@@ -58,15 +74,29 @@ export default function Dashboard() {
             {galleries.length} {galleries.length === 1 ? 'gallery' : 'galleries'}
           </div>
           <div style={{ display: 'grid', gap: '12px' }}>
-            {galleries.map(gallery => (
-              <div key={gallery.id} style={{ border: '1px solid #e8e0d0', padding: '28px 32px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: '400', marginBottom: '6px' }}>{gallery.name}</h3>
-                  <p style={{ fontFamily: 'monospace', fontSize: '11px', color: '#aaa', letterSpacing: '0.1em' }}>Client: {gallery.client_name} · Password: {gallery.password}</p>
+            {galleries.map(gallery => {
+              const isDeleting = deleting === gallery.id
+              return (
+                <div key={gallery.id} style={{ border: '1px solid #e8e0d0', padding: '28px 32px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: isDeleting ? 0.5 : 1 }}>
+                  <div>
+                    <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: '400', marginBottom: '6px' }}>{gallery.name}</h3>
+                    <p style={{ fontFamily: 'monospace', fontSize: '11px', color: '#aaa', letterSpacing: '0.1em' }}>
+                      Client: {gallery.client_name} · {gallery.password ? `Password: ${gallery.password}` : 'Public'}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <a href={`/gallery/${gallery.id}`} style={{ padding: '10px 20px', border: '1px solid #ddd', textDecoration: 'none', color: '#1a1410', fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>View</a>
+                    <button
+                      onClick={() => handleDelete(gallery)}
+                      disabled={isDeleting}
+                      style={{ padding: '10px 20px', border: '1px solid #e8d0d0', background: 'transparent', color: '#c0392b', cursor: isDeleting ? 'not-allowed' : 'pointer', fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase' }}
+                    >
+                      {isDeleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
                 </div>
-                <a href={`/gallery/${gallery.id}`} style={{ padding: '10px 20px', border: '1px solid #ddd', textDecoration: 'none', color: '#1a1410', fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>View</a>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

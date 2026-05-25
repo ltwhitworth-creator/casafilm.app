@@ -27,6 +27,7 @@ export default function GalleryPage(props) {
         .eq('id', id)
         .single()
       setGallery(data)
+      if (!data?.password) setUnlocked(true)
       setLoading(false)
     }
     getGallery()
