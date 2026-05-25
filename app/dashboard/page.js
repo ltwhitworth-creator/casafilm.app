@@ -1,6 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { uploadCoverWithProgress } from '../lib/uploadCover'
 
 function getGreeting(email) {
   const hour = new Date().getHours()
@@ -37,6 +38,10 @@ export default function Dashboard() {
   const [galleries, setGalleries] = useState([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(null)
+  const [videos, setVideos] = useState([])
+  const [deletingVideo, setDeletingVideo] = useState(null)
+  const [updatingCoverFor, setUpdatingCoverFor] = useState(null)
+  const coverInputRef = useRef(null)
 
   useEffect(() => {
     async function getData() {
@@ -52,6 +57,15 @@ export default function Dashboard() {
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
       setGalleries(data || [])
+      const galleryIds = (data || []).map(g => g.id)
+      if (galleryIds.length > 0) {
+        const { data: vData } = await supabase
+          .from('videos')
+          .select('*')
+          .in('gallery_id', galleryIds)
+          .order('order', { ascending: true })
+        setVideos(vData || [])
+      }
       setLoading(false)
     }
     getData()
@@ -60,6 +74,69 @@ export default function Dashboard() {
   async function handleLogout() {
     await supabase.auth.signOut()
     window.location.href = '/login'
+  }
+
+  async function handleDeleteVideo(video) {
+    if (!confirm(`Delete "${video.title}"? This cannot be undone.`)) return
+    setDeletingVideo(video.id)
+    try {
+      if (video.video_uid) {
+        await fetch(`/api/stream/${video.video_uid}`, { method: 'DELETE' })
+      }
+      await supabase.from('videos').delete().eq('id', video.id)
+      setVideos(prev => prev.filter(v => v.id !== video.id))
+    } finally {
+      setDeletingVideo(null)
+    }
+  }
+
+  async function handleCoverChange(e) {
+    const file = e.target.files[0]
+    e.target.value = ''
+    const galleryId = updatingCoverFor
+    setUpdatingCoverFor(null)
+    if (!file || !galleryId) return
+
+    setGalleries(prev => prev.map(g =>
+      g.id === galleryId ? { ...g, _coverUploading: true, _coverProgress: 0, _coverError: '' } : g
+    ))
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+
+      const path = await uploadCoverWithProgress(file, session.access_token, (pct) => {
+        setGalleries(prev => prev.map(g =>
+          g.id === galleryId ? { ...g, _coverProgress: pct } : g
+        ))
+      })
+
+      const { data: { publicUrl } } = supabase.storage.from('gallery-covers').getPublicUrl(path)
+      await supabase.from('galleries').update({ cover_image_url: publicUrl }).eq('id', galleryId)
+      setGalleries(prev => prev.map(g =>
+        g.id === galleryId
+          ? { ...g, cover_image_url: publicUrl, _coverUploading: false, _coverProgress: 100, _coverError: '' }
+          : g
+      ))
+    } catch (err) {
+      setGalleries(prev => prev.map(g =>
+        g.id === galleryId
+          ? { ...g, _coverUploading: false, _coverProgress: 0, _coverError: err.message || 'Upload failed' }
+          : g
+      ))
+    }
+  }
+
+  async function handleDeleteLegacyVideo(gallery) {
+    if (!confirm(`Delete the main video for "${gallery.name}"? This cannot be undone.`)) return
+    setDeletingVideo(`legacy-${gallery.id}`)
+    try {
+      await fetch(`/api/stream/${gallery.video_uid}`, { method: 'DELETE' })
+      await supabase.from('galleries').update({ video_uid: null }).eq('id', gallery.id)
+      setGalleries(prev => prev.map(g => g.id === gallery.id ? { ...g, video_uid: null } : g))
+    } finally {
+      setDeletingVideo(null)
+    }
   }
 
   async function handleDelete(gallery) {
@@ -96,7 +173,7 @@ export default function Dashboard() {
     )
   }
 
-  const videoCount = galleries.filter(g => g.video_uid).length
+  const videoCount = galleries.filter(g => g.video_uid).length + videos.length
 
   return (
     <>
@@ -142,11 +219,73 @@ export default function Dashboard() {
           box-shadow: 0 1px 4px rgba(26,20,16,0.06), 0 4px 20px rgba(26,20,16,0.04);
           padding: 24px 28px;
           display: flex;
+          flex-wrap: wrap;
           align-items: flex-start;
           justify-content: space-between;
           gap: 24px;
           transition: box-shadow 0.2s, transform 0.2s;
         }
+
+        /* ── Video list within card ── */
+        .dash-video-list {
+          width: 100%;
+          flex-basis: 100%;
+          border-top: 1px solid rgba(26,20,16,0.07);
+          padding-top: 14px;
+          margin-top: -8px;
+        }
+        .dash-video-list-label {
+          font-family: 'DM Mono', monospace;
+          font-size: 8px;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: #c0b8ae;
+          margin-bottom: 8px;
+        }
+        .dash-video-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 7px 0;
+          border-bottom: 1px solid rgba(26,20,16,0.05);
+        }
+        .dash-video-row:last-child { border-bottom: none; }
+        .dash-video-num {
+          font-family: 'DM Mono', monospace;
+          font-size: 9px;
+          color: #b5874a;
+          letter-spacing: 0.06em;
+          flex-shrink: 0;
+          width: 18px;
+        }
+        .dash-video-name {
+          flex: 1;
+          font-family: 'DM Mono', monospace;
+          font-size: 10px;
+          color: #5a4e42;
+          letter-spacing: 0.05em;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .dash-video-del {
+          background: none;
+          border: 1px solid rgba(184,50,50,0.22);
+          color: #b83232;
+          cursor: pointer;
+          font-family: 'DM Mono', monospace;
+          font-size: 8px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          padding: 5px 10px;
+          flex-shrink: 0;
+          transition: background 0.15s, border-color 0.15s;
+        }
+        .dash-video-del:hover:not(:disabled) {
+          background: rgba(184,50,50,0.05);
+          border-color: rgba(184,50,50,0.38);
+        }
+        .dash-video-del:disabled { opacity: 0.4; cursor: not-allowed; }
         .dash-card:hover {
           box-shadow: 0 2px 10px rgba(26,20,16,0.09), 0 8px 28px rgba(26,20,16,0.07);
           transform: translateY(-1px);
@@ -263,6 +402,15 @@ export default function Dashboard() {
 
       <div style={{ minHeight: '100vh', background: '#f5f0e8' }}>
 
+        {/* Hidden cover image input */}
+        <input
+          ref={coverInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          style={{ display: 'none' }}
+          onChange={handleCoverChange}
+        />
+
         {/* ── Navigation ── */}
         <nav className="dash-nav">
           {/* Logo */}
@@ -358,11 +506,15 @@ export default function Dashboard() {
                 {galleries.map(gallery => {
                   const isDeleting = deleting === gallery.id
                   const hasEmail = Boolean(gallery.client_email)
+                  const galleryVideos = videos.filter(v => v.gallery_id === gallery.id)
                   return (
                     <div key={gallery.id} className={`dash-card${isDeleting ? ' is-deleting' : ''}`}>
 
                       {/* Gallery info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
+                        {gallery.cover_image_url && (
+                          <div style={{ marginBottom: '10px', width: '80px', height: '50px', backgroundImage: `url(${gallery.cover_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid rgba(181,135,74,0.2)' }} />
+                        )}
                         <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '21px', fontWeight: 400, color: '#1a1410', marginBottom: '6px', lineHeight: 1.3 }}>
                           {gallery.name}
                         </h3>
@@ -387,6 +539,22 @@ export default function Dashboard() {
                           View
                         </a>
 
+                        <a href={`/gallery/${gallery.id}?preview=true`} target="_blank" rel="noopener noreferrer" className="dash-btn dash-btn-outline">
+                          Preview
+                        </a>
+
+                        <a href={`/galleries/${gallery.id}/add-video`} className="dash-btn dash-btn-outline">
+                          Add Video
+                        </a>
+
+                        <button
+                          className="dash-btn dash-btn-outline"
+                          onClick={() => { setUpdatingCoverFor(gallery.id); coverInputRef.current?.click() }}
+                          disabled={gallery._coverUploading}
+                        >
+                          {gallery._coverUploading ? 'Uploading…' : gallery.cover_image_url ? 'Change Cover' : 'Add Cover'}
+                        </button>
+
                         <button
                           className={`dash-btn dash-btn-outline${!hasEmail ? ' dash-btn-muted' : ''}`}
                           disabled={!hasEmail}
@@ -403,6 +571,64 @@ export default function Dashboard() {
                           {isDeleting ? '…' : 'Delete'}
                         </button>
                       </div>
+
+                      {/* Cover upload progress */}
+                      {(gallery._coverUploading || gallery._coverError) && (
+                        <div style={{ width: '100%', flexBasis: '100%', borderTop: '1px solid rgba(26,20,16,0.07)', paddingTop: '14px', marginTop: '-8px' }}>
+                          {gallery._coverUploading ? (
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em' }}>
+                                  Uploading cover image…
+                                </span>
+                                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#b5874a' }}>
+                                  {gallery._coverProgress ?? 0}%
+                                </span>
+                              </div>
+                              <div style={{ width: '100%', height: '3px', background: 'rgba(26,20,16,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', background: '#b5874a', borderRadius: '2px', transition: 'width 0.25s ease', width: `${gallery._coverProgress ?? 0}%` }} />
+                              </div>
+                            </>
+                          ) : gallery._coverError ? (
+                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#b83232', letterSpacing: '0.08em' }}>
+                              Cover upload failed: {gallery._coverError}
+                            </p>
+                          ) : null}
+                        </div>
+                      )}
+
+                      {/* Video list */}
+                      {(gallery.video_uid || galleryVideos.length > 0) && (
+                        <div className="dash-video-list">
+                          <p className="dash-video-list-label">Films in this gallery</p>
+                          {gallery.video_uid && (
+                            <div className="dash-video-row">
+                              <span className="dash-video-num">01</span>
+                              <span className="dash-video-name">Main Film</span>
+                              <button
+                                className="dash-video-del"
+                                onClick={() => handleDeleteLegacyVideo(gallery)}
+                                disabled={deletingVideo === `legacy-${gallery.id}`}
+                              >
+                                {deletingVideo === `legacy-${gallery.id}` ? '…' : 'Delete'}
+                              </button>
+                            </div>
+                          )}
+                          {galleryVideos.map((v, i) => (
+                            <div key={v.id} className="dash-video-row">
+                              <span className="dash-video-num">{String(i + (gallery.video_uid ? 2 : 1)).padStart(2, '0')}</span>
+                              <span className="dash-video-name">{v.title || 'Untitled'}</span>
+                              <button
+                                className="dash-video-del"
+                                onClick={() => handleDeleteVideo(v)}
+                                disabled={deletingVideo === v.id}
+                              >
+                                {deletingVideo === v.id ? '…' : 'Delete'}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                     </div>
                   )

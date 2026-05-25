@@ -2,10 +2,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { Upload } from 'tus-js-client'
 import { supabase } from '../../lib/supabase'
+import { uploadCoverWithProgress } from '../../lib/uploadCover'
 
 function formatFileSize(bytes) {
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GB`
-  return `${(bytes / 1024 ** 2).toFixed(0)} MB`
+  if (bytes >= 1024 ** 2) return `${(bytes / 1024 ** 2).toFixed(0)} MB`
+  return `${Math.round(bytes / 1024)} KB`
 }
 
 export default function NewGallery() {
@@ -21,6 +23,14 @@ export default function NewGallery() {
   const [uploadStage, setUploadStage] = useState('')
   const [message, setMessage] = useState('')
   const fileInputRef = useRef(null)
+  const coverInputRef = useRef(null)
+  const [coverFile, setCoverFile] = useState(null)
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState(null)
+  const [coverDragOver, setCoverDragOver] = useState(false)
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [coverProgress, setCoverProgress] = useState(0)
+  const [coverUrl, setCoverUrl] = useState(null)
+  const [coverUploadError, setCoverUploadError] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -38,6 +48,29 @@ export default function NewGallery() {
     setDragOver(false)
     const file = e.dataTransfer.files[0]
     if (file?.type.startsWith('video/')) setVideo(file)
+  }
+
+  async function handleCoverSelect(file) {
+    if (!file) return
+    if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
+    setCoverFile(file)
+    setCoverPreviewUrl(URL.createObjectURL(file))
+    setCoverUploading(true)
+    setCoverProgress(0)
+    setCoverUrl(null)
+    setCoverUploadError('')
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+      const path = await uploadCoverWithProgress(file, session.access_token, setCoverProgress)
+      const { data: { publicUrl } } = supabase.storage.from('gallery-covers').getPublicUrl(path)
+      setCoverUrl(publicUrl)
+    } catch (err) {
+      setCoverUploadError(err.message || 'Upload failed — please try again')
+    } finally {
+      setCoverUploading(false)
+    }
   }
 
   async function handleCreate() {
@@ -94,6 +127,7 @@ export default function NewGallery() {
       password: password || null,
       user_id: session.user.id,
       video_uid: videoUid,
+      cover_image_url: coverUrl || null,
       owner_type: 'videographer',
       ownership_transferred: false,
       storage_tier: 'active',
@@ -359,6 +393,94 @@ export default function NewGallery() {
                 </div>
               </div>
 
+              {/* Cover image */}
+              <div className="ng-section">
+                <div className="ng-section-head">
+                  <span className="ng-section-label">Cover Image</span>
+                  <div className="ng-section-rule" />
+                </div>
+                <div className="ng-field">
+                  <label className="ng-label">
+                    Cover image
+                    <span style={{ color: '#b8ae9e', fontFamily: "'Jost', sans-serif", textTransform: 'none', letterSpacing: 0, fontSize: '11px', fontWeight: 300, marginLeft: '6px' }}>optional</span>
+                  </label>
+                  <div
+                    className={`ng-drop${coverDragOver ? ' over' : ''}`}
+                    onClick={() => coverInputRef.current?.click()}
+                    onDragOver={e => { e.preventDefault(); setCoverDragOver(true) }}
+                    onDragLeave={() => setCoverDragOver(false)}
+                    onDrop={e => {
+                      e.preventDefault()
+                      setCoverDragOver(false)
+                      const file = e.dataTransfer.files[0]
+                      if (file && /^image\/(jpeg|jpg|png|webp)$/i.test(file.type)) handleCoverSelect(file)
+                    }}
+                    style={{ padding: coverFile ? '20px 28px' : undefined }}
+                  >
+                    {coverFile ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left', width: '100%' }}>
+                        {/* Preview row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <img
+                            src={coverPreviewUrl}
+                            alt="Cover preview"
+                            style={{ width: '80px', height: '56px', objectFit: 'cover', display: 'block', border: `1px solid ${coverUploadError ? 'rgba(184,50,50,0.4)' : 'rgba(181,135,74,0.3)'}`, flexShrink: 0 }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#b5874a', letterSpacing: '0.06em', marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {coverFile.name}
+                            </p>
+                            {coverUploading ? (
+                              <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#b5874a', fontWeight: 300 }}>
+                                Uploading cover image… {coverProgress}%
+                              </p>
+                            ) : coverUploadError ? (
+                              <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#b83232', fontWeight: 300 }}>
+                                {coverUploadError} — click to retry
+                              </p>
+                            ) : coverUrl ? (
+                              <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#78a87c', fontWeight: 300 }}>
+                                Cover uploaded ✓ · Click to change
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+                        {/* Progress bar — visible while uploading */}
+                        {coverUploading && (
+                          <div className="ng-progress-track">
+                            <div className="ng-progress-bar" style={{ width: `${coverProgress}%` }} />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b5874a" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '12px', opacity: 0.75 }}>
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#7a6e62', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                          Drop an image or click to browse
+                        </p>
+                        <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#b0a898', fontWeight: 300 }}>
+                          JPG, PNG, WEBP · Shown behind the gallery title
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      const file = e.target.files[0]
+                      if (file) handleCoverSelect(file)
+                    }}
+                  />
+                </div>
+              </div>
+
               {/* Film upload */}
               <div className="ng-section">
                 <div className="ng-section-head">
@@ -444,9 +566,9 @@ export default function NewGallery() {
               <button
                 className="ng-submit"
                 onClick={handleCreate}
-                disabled={loading || !name || !clientName}
+                disabled={loading || coverUploading || !name || !clientName}
               >
-                {loading ? (uploadStage || 'Please wait…') : 'Create Gallery'}
+                {loading ? (uploadStage || 'Please wait…') : coverUploading ? 'Uploading cover…' : 'Create Gallery'}
               </button>
 
             </div>
