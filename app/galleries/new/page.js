@@ -7,6 +7,7 @@ export default function NewGallery() {
   const [name, setName] = useState('')
   const [clientName, setClientName] = useState('')
   const [password, setPassword] = useState('')
+  const [clientEmail, setClientEmail] = useState('')
   const [video, setVideo] = useState(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -83,9 +84,13 @@ export default function NewGallery() {
       .insert({
         name,
         client_name: clientName,
+        client_email: clientEmail || null,
         password: password || null,
         user_id: session.user.id,
-        video_uid: videoUid
+        video_uid: videoUid,
+        owner_type: 'videographer',
+        ownership_transferred: false,
+        storage_tier: 'active'
       })
 
     if (error) {
@@ -130,6 +135,20 @@ export default function NewGallery() {
         onChange={e => setClientName(e.target.value)}
         style={{ width: '100%', padding: '14px', marginBottom: '24px', fontSize: '15px', border: '1px solid #ddd', outline: 'none', fontFamily: 'inherit' }}
       />
+
+      <label style={{ display: 'block', fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
+        Client email address <span style={{ color: '#bbb', textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+      </label>
+      <input
+        type="email"
+        placeholder="e.g. sarah@example.com"
+        value={clientEmail}
+        onChange={e => setClientEmail(e.target.value)}
+        style={{ width: '100%', padding: '14px', marginBottom: '8px', fontSize: '15px', border: '1px solid #ddd', outline: 'none', fontFamily: 'inherit' }}
+      />
+      <p style={{ fontFamily: 'monospace', fontSize: '11px', color: '#aaa', marginBottom: '32px', letterSpacing: '0.05em' }}>
+        Used to notify them when their gallery is ready
+      </p>
 
       <label style={{ display: 'block', fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
         Client password <span style={{ color: '#bbb', textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
