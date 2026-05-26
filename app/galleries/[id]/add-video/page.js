@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Upload } from 'tus-js-client'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
+import { useUpload } from '../../../components/UploadProvider'
 
 function formatFileSize(bytes) {
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GB`
@@ -9,6 +10,8 @@ function formatFileSize(bytes) {
 }
 
 export default function AddVideo(props) {
+  const router = useRouter()
+  const { startUpload } = useUpload()
   const [user, setUser] = useState(null)
   const [gallery, setGallery] = useState(null)
   const [galleryId, setGalleryId] = useState(null)
@@ -16,8 +19,6 @@ export default function AddVideo(props) {
   const [video, setVideo] = useState(null)
   const [dragOver, setDragOver] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [uploadStage, setUploadStage] = useState('')
   const [message, setMessage] = useState('')
   const [existingVideos, setExistingVideos] = useState([])
   const [deletingVideo, setDeletingVideo] = useState(null)
@@ -74,65 +75,8 @@ export default function AddVideo(props) {
       setMessage('Please enter a title and select a video file.')
       return
     }
-    setLoading(true)
-    setMessage('')
-
-    let videoUid = null
-    try {
-      setUploadStage('Uploading video…')
-      setProgress(0)
-      videoUid = await new Promise((resolve, reject) => {
-        let capturedUid = null
-        const upload = new Upload(video, {
-          endpoint: '/api/upload',
-          chunkSize: 50 * 1024 * 1024,
-          retryDelays: [0, 3000, 5000, 10000, 20000],
-          metadata: { filename: video.name, filetype: video.type },
-          onAfterResponse(req, res) {
-            const mediaId = res.getHeader('Stream-Media-Id')
-            if (mediaId) capturedUid = mediaId
-          },
-          onProgress(bytesUploaded, bytesTotal) {
-            setProgress(Math.round((bytesUploaded / bytesTotal) * 100))
-          },
-          onSuccess() {
-            setProgress(100)
-            setUploadStage('Video uploaded!')
-            resolve(capturedUid)
-          },
-          onError(err) { reject(err) },
-        })
-        upload.start()
-      })
-    } catch (err) {
-      setMessage('Video upload failed — ' + err.message)
-      setLoading(false)
-      return
-    }
-
-    // Determine next order value
-    const { data: existing } = await supabase
-      .from('videos')
-      .select('order')
-      .eq('gallery_id', parseInt(galleryId))
-      .order('order', { ascending: false })
-      .limit(1)
-    const nextOrder = existing?.[0]?.order != null ? existing[0].order + 1 : 1
-
-    setUploadStage('Saving…')
-    const { error } = await supabase.from('videos').insert({
-      gallery_id: parseInt(galleryId),
-      video_uid: videoUid,
-      title: title.trim(),
-      order: nextOrder,
-    })
-
-    if (error) {
-      setMessage('Something went wrong — ' + error.message)
-      setLoading(false)
-    } else {
-      window.location.href = '/dashboard'
-    }
+    startUpload({ file: video, galleryId, title: title.trim(), type: 'video_table' })
+    router.push('/dashboard')
   }
 
   return (
@@ -474,20 +418,10 @@ export default function AddVideo(props) {
                   onChange={e => setVideo(e.target.files[0] || null)}
                 />
 
-                {loading && video && (
-                  <div style={{ marginTop: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em' }}>
-                        {uploadStage}
-                      </span>
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#b5874a' }}>
-                        {progress}%
-                      </span>
-                    </div>
-                    <div className="av-progress-track">
-                      <div className="av-progress-bar" style={{ width: `${progress}%` }} />
-                    </div>
-                  </div>
+                {video && (
+                  <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em', marginTop: '12px' }}>
+                    Upload will run in the background — you can navigate freely.
+                  </p>
                 )}
               </div>
 
@@ -500,9 +434,9 @@ export default function AddVideo(props) {
               <button
                 className="av-submit"
                 onClick={handleAdd}
-                disabled={loading || !title.trim() || !video}
+                disabled={!title.trim() || !video}
               >
-                {loading ? (uploadStage || 'Please wait…') : 'Upload Film'}
+                Upload Film
               </button>
 
             </div>

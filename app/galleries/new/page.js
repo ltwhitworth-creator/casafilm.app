@@ -1,28 +1,18 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Upload } from 'tus-js-client'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { uploadCoverWithProgress } from '../../lib/uploadCover'
 
-function formatFileSize(bytes) {
-  if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GB`
-  if (bytes >= 1024 ** 2) return `${(bytes / 1024 ** 2).toFixed(0)} MB`
-  return `${Math.round(bytes / 1024)} KB`
-}
-
 export default function NewGallery() {
+  const router = useRouter()
   const [user, setUser] = useState(null)
   const [name, setName] = useState('')
   const [clientName, setClientName] = useState('')
   const [clientEmail, setClientEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [video, setVideo] = useState(null)
-  const [dragOver, setDragOver] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [uploadStage, setUploadStage] = useState('')
   const [message, setMessage] = useState('')
-  const fileInputRef = useRef(null)
   const coverInputRef = useRef(null)
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreviewUrl, setCoverPreviewUrl] = useState(null)
@@ -41,13 +31,6 @@ export default function NewGallery() {
   async function handleLogout() {
     await supabase.auth.signOut()
     window.location.href = '/login'
-  }
-
-  function handleDrop(e) {
-    e.preventDefault()
-    setDragOver(false)
-    const file = e.dataTransfer.files[0]
-    if (file?.type.startsWith('video/')) setVideo(file)
   }
 
   async function handleCoverSelect(file) {
@@ -84,61 +67,26 @@ export default function NewGallery() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
 
-    let videoUid = null
-    if (video) {
-      try {
-        setUploadStage('Uploading video…')
-        setProgress(0)
-        videoUid = await new Promise((resolve, reject) => {
-          let capturedUid = null
-          const upload = new Upload(video, {
-            endpoint: '/api/upload',
-            chunkSize: 50 * 1024 * 1024,
-            retryDelays: [0, 3000, 5000, 10000, 20000],
-            metadata: { filename: video.name, filetype: video.type },
-            onAfterResponse(req, res) {
-              const mediaId = res.getHeader('Stream-Media-Id')
-              if (mediaId) capturedUid = mediaId
-            },
-            onProgress(bytesUploaded, bytesTotal) {
-              setProgress(Math.round((bytesUploaded / bytesTotal) * 100))
-            },
-            onSuccess() {
-              setProgress(100)
-              setUploadStage('Video uploaded!')
-              resolve(capturedUid)
-            },
-            onError(err) { reject(err) },
-          })
-          upload.start()
-        })
-      } catch (err) {
-        setMessage('Video upload failed — ' + err.message)
-        setLoading(false)
-        return
-      }
-    }
-
-    setUploadStage('Creating gallery…')
-    const { error } = await supabase.from('galleries').insert({
+    const { data: galleryData, error } = await supabase.from('galleries').insert({
       name,
       client_name: clientName,
       client_email: clientEmail || null,
       password: password || null,
       user_id: session.user.id,
-      video_uid: videoUid,
+      video_uid: null,
       cover_image_url: coverUrl || null,
       owner_type: 'videographer',
       ownership_transferred: false,
       storage_tier: 'active',
-    })
+    }).select('id').single()
 
     if (error) {
       setMessage('Something went wrong — ' + error.message)
       setLoading(false)
-    } else {
-      window.location.href = '/dashboard'
+      return
     }
+
+    router.push('/dashboard')
   }
 
   return (
@@ -419,7 +367,6 @@ export default function NewGallery() {
                   >
                     {coverFile ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left', width: '100%' }}>
-                        {/* Preview row */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                           <img
                             src={coverPreviewUrl}
@@ -445,7 +392,6 @@ export default function NewGallery() {
                             ) : null}
                           </div>
                         </div>
-                        {/* Progress bar — visible while uploading */}
                         {coverUploading && (
                           <div className="ng-progress-track">
                             <div className="ng-progress-bar" style={{ width: `${coverProgress}%` }} />
@@ -481,80 +427,6 @@ export default function NewGallery() {
                 </div>
               </div>
 
-              {/* Film upload */}
-              <div className="ng-section">
-                <div className="ng-section-head">
-                  <span className="ng-section-label">Film</span>
-                  <div className="ng-section-rule" />
-                </div>
-
-                {/* Drop zone */}
-                <div
-                  className={`ng-drop${dragOver ? ' over' : ''}`}
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                >
-                  {/* Film strip icon */}
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#b5874a" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '14px', opacity: 0.75 }}>
-                    <rect x="2" y="2" width="20" height="20" rx="2.5" />
-                    <line x1="7" y1="2" x2="7" y2="22" />
-                    <line x1="17" y1="2" x2="17" y2="22" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                    <line x1="2" y1="7" x2="7" y2="7" />
-                    <line x1="17" y1="7" x2="22" y2="7" />
-                    <line x1="2" y1="17" x2="7" y2="17" />
-                    <line x1="17" y1="17" x2="22" y2="17" />
-                  </svg>
-
-                  {video ? (
-                    <>
-                      <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#b5874a', letterSpacing: '0.06em', marginBottom: '5px' }}>
-                        {video.name}
-                      </p>
-                      <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#9a8e82', fontWeight: 300 }}>
-                        {formatFileSize(video.size)} · Click or drop to change
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#7a6e62', letterSpacing: '0.06em', marginBottom: '6px' }}>
-                        Drop your video here or click to browse
-                      </p>
-                      <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#b0a898', fontWeight: 300 }}>
-                        MP4, MOV, MKV · up to 5 GB · resumable upload
-                      </p>
-                    </>
-                  )}
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="video/*"
-                  style={{ display: 'none' }}
-                  onChange={e => setVideo(e.target.files[0] || null)}
-                />
-
-                {/* Upload progress */}
-                {loading && video && (
-                  <div style={{ marginTop: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em' }}>
-                        {uploadStage}
-                      </span>
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#b5874a' }}>
-                        {progress}%
-                      </span>
-                    </div>
-                    <div className="ng-progress-track">
-                      <div className="ng-progress-bar" style={{ width: `${progress}%` }} />
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* Error */}
               {message && (
                 <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#b83232', marginBottom: '24px', lineHeight: 1.5 }}>
@@ -568,7 +440,7 @@ export default function NewGallery() {
                 onClick={handleCreate}
                 disabled={loading || coverUploading || !name || !clientName}
               >
-                {loading ? (uploadStage || 'Please wait…') : coverUploading ? 'Uploading cover…' : 'Create Gallery'}
+                {loading ? 'Creating gallery…' : coverUploading ? 'Uploading cover…' : 'Create Gallery'}
               </button>
 
             </div>
@@ -598,8 +470,8 @@ export default function NewGallery() {
               </div>
 
               <div className="ng-tip">
-                <div className="ng-tip-label">Uploading your film</div>
-                <p className="ng-tip-body">We use resumable chunked uploading, so large files are safe even on slower connections. You can also skip this step and add the film after the gallery is created.</p>
+                <div className="ng-tip-label">Adding films</div>
+                <p className="ng-tip-body">Once the gallery is created you'll land on the dashboard. Use the Add Video button on the gallery card to upload films — they'll upload in the background while you keep working.</p>
               </div>
             </div>
 

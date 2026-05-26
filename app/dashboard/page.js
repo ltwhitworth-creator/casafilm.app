@@ -41,7 +41,16 @@ export default function Dashboard() {
   const [videos, setVideos] = useState([])
   const [deletingVideo, setDeletingVideo] = useState(null)
   const [updatingCoverFor, setUpdatingCoverFor] = useState(null)
+  const [settingThumbnailFor, setSettingThumbnailFor] = useState(null)
+  const [uploadingThumbnailFor, setUploadingThumbnailFor] = useState(null)
+  const [renamingVideoId, setRenamingVideoId] = useState(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [savingRename, setSavingRename] = useState(false)
+  // dragState tracks the currently-hovered drop target for visual feedback
+  const [dragOverId, setDragOverId] = useState(null)
+  const draggedIdRef = useRef(null)
   const coverInputRef = useRef(null)
+  const thumbnailInputRef = useRef(null)
 
   useEffect(() => {
     async function getData() {
@@ -69,6 +78,30 @@ export default function Dashboard() {
       setLoading(false)
     }
     getData()
+  }, [])
+
+  useEffect(() => {
+    async function onUploadComplete(e) {
+      const gId = e.detail?.galleryId
+      if (!gId) return
+      const galleryIdInt = parseInt(gId)
+      const [{ data: galleryRow }, { data: videosData }] = await Promise.all([
+        supabase.from('galleries').select('*').eq('id', galleryIdInt).single(),
+        supabase.from('videos').select('*').eq('gallery_id', galleryIdInt).order('order', { ascending: true }),
+      ])
+      if (galleryRow) {
+        setGalleries(prev => {
+          const exists = prev.some(g => g.id === galleryIdInt)
+          if (exists) return prev.map(g => g.id === galleryIdInt ? { ...g, ...galleryRow } : g)
+          return [galleryRow, ...prev]
+        })
+      }
+      if (videosData) {
+        setVideos(prev => [...prev.filter(v => v.gallery_id !== galleryIdInt), ...videosData])
+      }
+    }
+    window.addEventListener('cf-upload-complete', onUploadComplete)
+    return () => window.removeEventListener('cf-upload-complete', onUploadComplete)
   }, [])
 
   async function handleLogout() {
@@ -136,6 +169,108 @@ export default function Dashboard() {
       setGalleries(prev => prev.map(g => g.id === gallery.id ? { ...g, video_uid: null } : g))
     } finally {
       setDeletingVideo(null)
+    }
+  }
+
+  async function handleDrop(targetVideoId, galleryId, galleryVideos) {
+    const draggedId = draggedIdRef.current
+    draggedIdRef.current = null
+    setDragOverId(null)
+    if (!draggedId || draggedId === targetVideoId) return
+
+    const sorted = [...galleryVideos].sort((a, b) => a.order - b.order)
+    const fromIdx = sorted.findIndex(v => v.id === draggedId)
+    const toIdx   = sorted.findIndex(v => v.id === targetVideoId)
+    if (fromIdx === -1 || toIdx === -1) return
+
+    const reordered = [...sorted]
+    const [moved] = reordered.splice(fromIdx, 1)
+    reordered.splice(toIdx, 0, moved)
+
+    const base = Math.min(...sorted.map(v => v.order))
+    const updates = reordered.map((v, i) => ({ id: v.id, order: base + i }))
+
+    // Optimistic UI update
+    setVideos(prev => {
+      const map = {}
+      updates.forEach(u => { map[u.id] = u.order })
+      return prev.map(v => map[v.id] !== undefined ? { ...v, order: map[v.id] } : v)
+    })
+
+    // Persist
+    try {
+      for (const u of updates) {
+        await supabase.from('videos').update({ order: u.order }).eq('id', u.id)
+      }
+    } catch {}
+  }
+
+  async function handleThumbnailChange(e) {
+    const file = e.target.files[0]
+    e.target.value = ''
+    const targetId = settingThumbnailFor  // video id OR 'legacy-{galleryId}'
+    setSettingThumbnailFor(null)
+    if (!file || !targetId) return
+
+    setUploadingThumbnailFor(targetId)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+
+      const ext = file.name.split('.').pop() || 'jpg'
+      const storagePath = `thumbnails/${session.user.id}/${targetId}-${Date.now()}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('gallery-covers')
+        .upload(storagePath, file, { upsert: true, contentType: file.type })
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage.from('gallery-covers').getPublicUrl(storagePath)
+
+      if (String(targetId).startsWith('legacy-')) {
+        const galleryId = parseInt(String(targetId).replace('legacy-', ''))
+        await supabase.from('galleries').update({ thumbnail_url: publicUrl }).eq('id', galleryId)
+        setGalleries(prev => prev.map(g => g.id === galleryId ? { ...g, thumbnail_url: publicUrl } : g))
+      } else {
+        await supabase.from('videos').update({ thumbnail_url: publicUrl }).eq('id', targetId)
+        setVideos(prev => prev.map(v => v.id === targetId ? { ...v, thumbnail_url: publicUrl } : v))
+      }
+    } catch (err) {
+      alert('Thumbnail upload failed: ' + (err.message || 'Unknown error'))
+    } finally {
+      setUploadingThumbnailFor(null)
+    }
+  }
+
+  function startRename(id, currentTitle) {
+    setRenamingVideoId(id)
+    setRenameValue(currentTitle)
+  }
+
+  function cancelRename() {
+    setRenamingVideoId(null)
+    setRenameValue('')
+  }
+
+  async function saveRename(id) {
+    const trimmed = renameValue.trim()
+    if (!trimmed) { cancelRename(); return }
+    setSavingRename(true)
+    try {
+      if (String(id).startsWith('legacy-')) {
+        const gId = parseInt(String(id).replace('legacy-', ''))
+        await supabase.from('galleries').update({ video_title: trimmed }).eq('id', gId)
+        setGalleries(prev => prev.map(g => g.id === gId ? { ...g, video_title: trimmed } : g))
+      } else {
+        await supabase.from('videos').update({ title: trimmed }).eq('id', id)
+        setVideos(prev => prev.map(v => v.id === id ? { ...v, title: trimmed } : v))
+      }
+      setRenamingVideoId(null)
+      setRenameValue('')
+    } catch {
+      // keep input open so user can retry
+    } finally {
+      setSavingRename(false)
     }
   }
 
@@ -286,6 +421,89 @@ export default function Dashboard() {
           border-color: rgba(184,50,50,0.38);
         }
         .dash-video-del:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .dash-video-drag-handle {
+          cursor: grab;
+          color: #c0b8ae;
+          padding: 2px 5px 2px 2px;
+          flex-shrink: 0;
+          user-select: none;
+          display: flex;
+          align-items: center;
+          opacity: 0.5;
+          transition: opacity 0.15s;
+        }
+        .dash-video-drag-handle:active { cursor: grabbing; }
+        .dash-video-row:hover .dash-video-drag-handle { opacity: 1; }
+        .dash-video-row.is-dragging {
+          opacity: 0.32;
+          background: rgba(181,135,74,0.03);
+        }
+        .dash-video-row.is-drag-over {
+          box-shadow: 0 -2px 0 0 #b5874a;
+        }
+
+        .dash-video-main-badge {
+          font-family: 'DM Mono', monospace;
+          font-size: 8px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #b5874a;
+          background: rgba(181,135,74,0.08);
+          border: 1px solid rgba(181,135,74,0.22);
+          padding: 4px 8px;
+          flex-shrink: 0;
+          pointer-events: none;
+        }
+        .dash-video-pencil-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 2px 5px;
+          color: #c0b8ae;
+          flex-shrink: 0;
+          opacity: 0;
+          transition: opacity 0.15s, color 0.15s;
+          line-height: 1;
+        }
+        .dash-video-row:hover .dash-video-pencil-btn { opacity: 1; }
+        .dash-video-pencil-btn:hover { color: #b5874a; }
+        .dash-video-rename-input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid rgba(181,135,74,0.4);
+          font-family: 'DM Mono', monospace;
+          font-size: 10px;
+          color: #1a1410;
+          letter-spacing: 0.05em;
+          padding: 2px 0;
+          outline: none;
+          min-width: 60px;
+          transition: border-color 0.15s;
+        }
+        .dash-video-rename-input:focus { border-bottom-color: #b5874a; }
+        .dash-video-rename-input:disabled { opacity: 0.5; }
+
+        .dash-video-thumb-btn {
+          background: none;
+          border: 1px solid rgba(26,20,16,0.16);
+          color: #7a6e62;
+          cursor: pointer;
+          font-family: 'DM Mono', monospace;
+          font-size: 8px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          padding: 5px 9px;
+          flex-shrink: 0;
+          transition: background 0.15s, border-color 0.15s;
+        }
+        .dash-video-thumb-btn:hover:not(:disabled) {
+          background: rgba(26,20,16,0.04);
+          border-color: rgba(26,20,16,0.28);
+          color: #1a1410;
+        }
+        .dash-video-thumb-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .dash-card:hover {
           box-shadow: 0 2px 10px rgba(26,20,16,0.09), 0 8px 28px rgba(26,20,16,0.07);
           transform: translateY(-1px);
@@ -411,6 +629,15 @@ export default function Dashboard() {
           onChange={handleCoverChange}
         />
 
+        {/* Hidden thumbnail input */}
+        <input
+          ref={thumbnailInputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          style={{ display: 'none' }}
+          onChange={handleThumbnailChange}
+        />
+
         {/* ── Navigation ── */}
         <nav className="dash-nav">
           {/* Logo */}
@@ -506,7 +733,7 @@ export default function Dashboard() {
                 {galleries.map(gallery => {
                   const isDeleting = deleting === gallery.id
                   const hasEmail = Boolean(gallery.client_email)
-                  const galleryVideos = videos.filter(v => v.gallery_id === gallery.id)
+                  const galleryVideos = videos.filter(v => v.gallery_id === gallery.id).sort((a, b) => a.order - b.order)
                   return (
                     <div key={gallery.id} className={`dash-card${isDeleting ? ' is-deleting' : ''}`}>
 
@@ -601,10 +828,45 @@ export default function Dashboard() {
                       {(gallery.video_uid || galleryVideos.length > 0) && (
                         <div className="dash-video-list">
                           <p className="dash-video-list-label">Films in this gallery</p>
+
+                          {/* Legacy video (gallery.video_uid) — always position 0 */}
                           {gallery.video_uid && (
                             <div className="dash-video-row">
                               <span className="dash-video-num">01</span>
-                              <span className="dash-video-name">Main Film</span>
+                              {renamingVideoId === `legacy-${gallery.id}` ? (
+                                <input
+                                  autoFocus
+                                  className="dash-video-rename-input"
+                                  value={renameValue}
+                                  onChange={e => setRenameValue(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') saveRename(`legacy-${gallery.id}`)
+                                    if (e.key === 'Escape') cancelRename()
+                                  }}
+                                  onBlur={cancelRename}
+                                  disabled={savingRename}
+                                />
+                              ) : (
+                                <>
+                                  <span className="dash-video-name">{gallery.video_title || 'Main Film'}</span>
+                                  <button
+                                    className="dash-video-pencil-btn"
+                                    onClick={() => startRename(`legacy-${gallery.id}`, gallery.video_title || 'Main Film')}
+                                    title="Rename"
+                                  >
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                    </svg>
+                                  </button>
+                                </>
+                              )}
+                              <button
+                                className="dash-video-thumb-btn"
+                                onClick={() => { setSettingThumbnailFor(`legacy-${gallery.id}`); thumbnailInputRef.current?.click() }}
+                                disabled={uploadingThumbnailFor === `legacy-${gallery.id}`}
+                              >
+                                {uploadingThumbnailFor === `legacy-${gallery.id}` ? '…' : gallery.thumbnail_url ? 'Thumb ✓' : 'Set thumb'}
+                              </button>
                               <button
                                 className="dash-video-del"
                                 onClick={() => handleDeleteLegacyVideo(gallery)}
@@ -614,19 +876,91 @@ export default function Dashboard() {
                               </button>
                             </div>
                           )}
-                          {galleryVideos.map((v, i) => (
-                            <div key={v.id} className="dash-video-row">
-                              <span className="dash-video-num">{String(i + (gallery.video_uid ? 2 : 1)).padStart(2, '0')}</span>
-                              <span className="dash-video-name">{v.title || 'Untitled'}</span>
-                              <button
-                                className="dash-video-del"
-                                onClick={() => handleDeleteVideo(v)}
-                                disabled={deletingVideo === v.id}
+
+                          {/* Videos table entries — draggable */}
+                          {galleryVideos.map((v, i) => {
+                            const isThumbUploading = uploadingThumbnailFor === v.id
+                            const isDragging       = draggedIdRef.current === v.id
+                            const isDragOver       = dragOverId === v.id
+                            const isMain           = !gallery.video_uid && i === 0
+                            const isRenaming       = renamingVideoId === v.id
+                            return (
+                              <div
+                                key={v.id}
+                                className={`dash-video-row${isDragging ? ' is-dragging' : ''}${isDragOver ? ' is-drag-over' : ''}`}
+                                draggable={!isRenaming}
+                                onDragStart={e => {
+                                  draggedIdRef.current = v.id
+                                  e.dataTransfer.effectAllowed = 'move'
+                                }}
+                                onDragOver={e => {
+                                  e.preventDefault()
+                                  e.dataTransfer.dropEffect = 'move'
+                                  if (draggedIdRef.current && draggedIdRef.current !== v.id) {
+                                    setDragOverId(v.id)
+                                  }
+                                }}
+                                onDragLeave={() => setDragOverId(prev => prev === v.id ? null : prev)}
+                                onDrop={e => { e.preventDefault(); handleDrop(v.id, gallery.id, galleryVideos) }}
+                                onDragEnd={() => { draggedIdRef.current = null; setDragOverId(null) }}
                               >
-                                {deletingVideo === v.id ? '…' : 'Delete'}
-                              </button>
-                            </div>
-                          ))}
+                                {/* Drag handle */}
+                                <span className="dash-video-drag-handle" title="Drag to reorder">
+                                  <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor">
+                                    <circle cx="3" cy="2.5" r="1.3"/>
+                                    <circle cx="7" cy="2.5" r="1.3"/>
+                                    <circle cx="3" cy="7"   r="1.3"/>
+                                    <circle cx="7" cy="7"   r="1.3"/>
+                                    <circle cx="3" cy="11.5" r="1.3"/>
+                                    <circle cx="7" cy="11.5" r="1.3"/>
+                                  </svg>
+                                </span>
+                                <span className="dash-video-num">{String(i + (gallery.video_uid ? 2 : 1)).padStart(2, '0')}</span>
+                                {isRenaming ? (
+                                  <input
+                                    autoFocus
+                                    className="dash-video-rename-input"
+                                    value={renameValue}
+                                    onChange={e => setRenameValue(e.target.value)}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter') saveRename(v.id)
+                                      if (e.key === 'Escape') cancelRename()
+                                    }}
+                                    onBlur={cancelRename}
+                                    disabled={savingRename}
+                                  />
+                                ) : (
+                                  <>
+                                    <span className="dash-video-name">{v.title || 'Untitled'}</span>
+                                    <button
+                                      className="dash-video-pencil-btn"
+                                      onClick={() => startRename(v.id, v.title || 'Untitled')}
+                                      title="Rename"
+                                    >
+                                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                      </svg>
+                                    </button>
+                                  </>
+                                )}
+                                {isMain && <span className="dash-video-main-badge">Main</span>}
+                                <button
+                                  className="dash-video-thumb-btn"
+                                  onClick={() => { setSettingThumbnailFor(v.id); thumbnailInputRef.current?.click() }}
+                                  disabled={isThumbUploading}
+                                >
+                                  {isThumbUploading ? '…' : v.thumbnail_url ? 'Thumb ✓' : 'Set thumb'}
+                                </button>
+                                <button
+                                  className="dash-video-del"
+                                  onClick={() => handleDeleteVideo(v)}
+                                  disabled={deletingVideo === v.id}
+                                >
+                                  {deletingVideo === v.id ? '…' : 'Delete'}
+                                </button>
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
 

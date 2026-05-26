@@ -210,11 +210,11 @@ export default function GalleryPage(props) {
   // ── Unlocked — cinematic gallery view ────────────────────────────────────
 
   const legacyVideo = gallery.video_uid
-    ? { id: 'legacy', title: 'Main Film', video_uid: gallery.video_uid }
+    ? { id: 'legacy', title: 'Main Film', video_uid: gallery.video_uid, thumbnail_url: gallery.thumbnail_url || null }
     : null
   const allVideos = [
     ...(legacyVideo ? [legacyVideo] : []),
-    ...videos.map(v => ({ id: v.id, title: v.title || 'Untitled Film', video_uid: v.video_uid })),
+    ...videos.map(v => ({ id: v.id, title: v.title || 'Untitled Film', video_uid: v.video_uid, thumbnail_url: v.thumbnail_url || null })),
   ]
   const safeIndex = Math.min(activeVideoIndex, Math.max(0, allVideos.length - 1))
   const activeVideo = allVideos[safeIndex] ?? null
@@ -228,32 +228,43 @@ export default function GalleryPage(props) {
         h1, h2, h3, p, button { margin: 0; padding: 0; }
 
         /* ── Preview Banner ──────────────────────────────────────────────── */
+        @keyframes gc-preview-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.82; }
+        }
         .gc-preview-bar {
           position: fixed;
           top: 0; left: 0; right: 0;
           z-index: 1000;
-          background: #b5874a;
+          background: #d4a865;
+          height: 56px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 11px 40px;
+          padding: 0 40px;
+          animation: gc-preview-pulse 2.8s ease-in-out infinite;
         }
         .gc-preview-text {
           font-family: 'DM Mono', monospace;
-          font-size: 10px;
-          letter-spacing: 0.22em;
+          font-size: 13px;
+          letter-spacing: 0.28em;
           text-transform: uppercase;
           color: #1a1410;
           font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 10px;
         }
         .gc-preview-back {
           font-family: 'DM Mono', monospace;
-          font-size: 10px;
-          letter-spacing: 0.16em;
+          font-size: 11px;
+          letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: rgba(26,20,16,0.65);
+          color: rgba(26,20,16,0.72);
           text-decoration: none;
           transition: color 0.15s;
+          white-space: nowrap;
+          font-weight: 500;
         }
         .gc-preview-back:hover { color: #1a1410; }
 
@@ -588,7 +599,8 @@ export default function GalleryPage(props) {
 
         /* ── Mobile ──────────────────────────────────────────────────────── */
         @media (max-width: 640px) {
-          .gc-preview-bar { padding: 10px 20px; }
+          .gc-preview-bar { padding: 0 20px; }
+          .gc-preview-text { font-size: 11px; letter-spacing: 0.2em; }
           .gc-hero { padding: 60px 24px; min-height: 50vh; }
           .gc-hero-logo { top: 20px; left: 24px; }
           .gc-hero-title { font-size: 44px; }
@@ -616,12 +628,24 @@ export default function GalleryPage(props) {
       {/* ── Preview banner ─────────────────────────────────────────────────── */}
       {isPreview && (
         <div className="gc-preview-bar">
-          <span className="gc-preview-text">Preview Mode — viewing as your client</span>
+          <span className="gc-preview-text">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1410" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <rect x="2" y="2" width="20" height="20" rx="2.5" />
+              <line x1="7" y1="2" x2="7" y2="22" />
+              <line x1="17" y1="2" x2="17" y2="22" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <line x1="2" y1="7" x2="7" y2="7" />
+              <line x1="17" y1="7" x2="22" y2="7" />
+              <line x1="2" y1="17" x2="7" y2="17" />
+              <line x1="17" y1="17" x2="22" y2="17" />
+            </svg>
+            Preview Mode — viewing as your client
+          </span>
           <a href="/dashboard" className="gc-preview-back">← Back to Dashboard</a>
         </div>
       )}
       {/* Spacer so content clears the fixed preview bar */}
-      {isPreview && <div style={{ height: '44px', background: '#1a1410' }} />}
+      {isPreview && <div style={{ height: '56px', background: '#1a1410' }} />}
 
       {/* ── Grain overlay ──────────────────────────────────────────────────── */}
       <div className="gc-grain" />
@@ -665,7 +689,7 @@ export default function GalleryPage(props) {
           {activeVideo ? (
             <iframe
               key={activeVideo.video_uid}
-              src={`https://iframe.cloudflarestream.com/${activeVideo.video_uid}`}
+              src={`https://iframe.cloudflarestream.com/${activeVideo.video_uid}${activeVideo.thumbnail_url ? `?poster=${encodeURIComponent(activeVideo.thumbnail_url)}` : ''}`}
               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
               allowFullScreen
             />
@@ -719,10 +743,14 @@ export default function GalleryPage(props) {
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && selectVideo(i)}
                 >
                   <div className="gc-card-thumb">
-                    {/* Cloudflare Stream thumbnail */}
                     <div
                       className="gc-card-img"
-                      style={{ backgroundImage: `url(https://videodelivery.net/${v.video_uid}/thumbnails/thumbnail.jpg?time=3s&width=320&height=180)` }}
+                      style={{
+                        backgroundImage: `url(${
+                          v.thumbnail_url ||
+                          `https://videodelivery.net/${v.video_uid}/thumbnails/thumbnail.jpg?time=3s&width=320&height=180`
+                        })`,
+                      }}
                     />
                     <div className="gc-card-play">
                       <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
