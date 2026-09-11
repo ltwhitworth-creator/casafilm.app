@@ -13,6 +13,8 @@ export default function NewGallery() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [folders, setFolders] = useState([])
+  const [folderId, setFolderId] = useState('')
   const coverInputRef = useRef(null)
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreviewUrl, setCoverPreviewUrl] = useState(null)
@@ -24,13 +26,66 @@ export default function NewGallery() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setUser(session.user)
+      if (!session) return
+      setUser(session.user)
+      supabase.from('folders').select('*').eq('user_id', session.user.id).order('name', { ascending: true })
+        .then(({ data, error }) => {
+          if (error) console.error('[folders] failed to load folders:', error)
+          setFolders(data || [])
+        })
     })
   }, [])
 
   async function handleLogout() {
     await supabase.auth.signOut()
     window.location.href = '/login'
+  }
+
+  function explainFolderError(error) {
+    const msg = error?.message || ''
+    if (error?.code === '42P01' || /relation .*folders.* does not exist/i.test(msg)) {
+      return 'The "folders" table doesn\'t exist yet in your database. Run supabase/migrations/0001_dashboard_upgrades.sql in the Supabase SQL editor, then try again.'
+    }
+    if (error?.code === '42501' || /row-level security/i.test(msg)) {
+      return 'Row-level security blocked this — the folders table\'s policies don\'t recognise you as the owner of this row. Check the folders RLS policies in Supabase match your auth setup.'
+    }
+    return msg || 'Unknown error — check the browser console for details.'
+  }
+
+  async function handleCreateFolder() {
+    const folderName = window.prompt('New folder name (e.g. "2026 Weddings"):')
+    if (!folderName || !folderName.trim()) return
+
+    if (!user?.id) {
+      console.error('[folders] handleCreateFolder: no authenticated user in state')
+      alert('You need to be signed in to create a folder.')
+      return
+    }
+
+    const payload = { name: folderName.trim(), user_id: user.id }
+    console.log('[folders] creating folder', payload)
+
+    const { data, error } = await supabase
+      .from('folders')
+      .insert(payload)
+      .select()
+
+    if (error) {
+      console.error('[folders] insert failed:', error)
+      alert(`Could not create the folder:\n\n${explainFolderError(error)}`)
+      return
+    }
+
+    const created = data?.[0]
+    if (!created) {
+      console.error('[folders] insert reported success but returned no row', { data })
+      alert('The folder insert didn\'t return a row — it may not have been saved. Check the console and try refreshing.')
+      return
+    }
+
+    console.log('[folders] created folder', created)
+    setFolders(prev => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)))
+    setFolderId(String(created.id))
   }
 
   async function handleCoverSelect(file) {
@@ -75,6 +130,7 @@ export default function NewGallery() {
       user_id: session.user.id,
       video_uid: null,
       cover_image_url: coverUrl || null,
+      folder_id: folderId ? parseInt(folderId) : null,
       owner_type: 'videographer',
       ownership_transferred: false,
       storage_tier: 'active',
@@ -338,6 +394,35 @@ export default function NewGallery() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                   />
+                </div>
+              </div>
+
+              {/* Folder */}
+              <div className="ng-section">
+                <div className="ng-section-head">
+                  <span className="ng-section-label">Folder</span>
+                  <div className="ng-section-rule" />
+                </div>
+                <div className="ng-field">
+                  <label className="ng-label">
+                    Group this gallery into
+                    <span style={{ color: '#b8ae9e', fontFamily: "'Albert Sans', sans-serif", textTransform: 'none', letterSpacing: 0, fontSize: '11px', fontWeight: 400, marginLeft: '6px' }}>optional</span>
+                  </label>
+                  <select
+                    className="ng-input"
+                    value={folderId}
+                    onChange={e => {
+                      if (e.target.value === '__new__') { handleCreateFolder(); return }
+                      setFolderId(e.target.value)
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <option value="">No folder</option>
+                    {folders.map(f => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                    <option value="__new__">+ Create new folder…</option>
+                  </select>
                 </div>
               </div>
 
