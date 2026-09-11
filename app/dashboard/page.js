@@ -19,7 +19,7 @@ function StatusBadge({ tier }) {
   const label = tier === 'active' || !tier ? 'Active' : tier
   return (
     <span style={{
-      fontFamily: "'DM Mono', monospace",
+      fontFamily: "'Archivo', sans-serif", fontWeight: 600,
       fontSize: '9px',
       letterSpacing: '0.14em',
       textTransform: 'uppercase',
@@ -293,15 +293,15 @@ export default function Dashboard() {
       <>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@400;500&family=Jost:wght@300;400&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Archivo:wght@500;600&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <div style={{ minHeight: '100vh', background: '#f5f0e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '40px', color: '#1a1410', lineHeight: 1, marginBottom: '8px' }}>Casa</div>
+            <div style={{ fontFamily: "'Italiana', serif", fontSize: '40px', color: '#1a1410', lineHeight: 1, marginBottom: '8px' }}>Casa</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '28px' }}>
               <div style={{ width: '36px', height: '1px', background: '#b5874a' }} />
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '8px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
+              <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '8px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
             </div>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', color: '#9a8e82', textTransform: 'uppercase' }}>Loading…</p>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.2em', color: '#9a8e82', textTransform: 'uppercase' }}>Loading…</p>
           </div>
         </div>
       </>
@@ -314,7 +314,7 @@ export default function Dashboard() {
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@400;500&family=Jost:wght@300;400&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Archivo:wght@500;600&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
       <style>{`
         /* ── Nav ── */
@@ -370,7 +370,7 @@ export default function Dashboard() {
           margin-top: -8px;
         }
         .dash-video-list-label {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 8px;
           letter-spacing: 0.24em;
           text-transform: uppercase;
@@ -386,7 +386,7 @@ export default function Dashboard() {
         }
         .dash-video-row:last-child { border-bottom: none; }
         .dash-video-num {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           color: #b5874a;
           letter-spacing: 0.06em;
@@ -395,7 +395,7 @@ export default function Dashboard() {
         }
         .dash-video-name {
           flex: 1;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 10px;
           color: #5a4e42;
           letter-spacing: 0.05em;
@@ -408,7 +408,7 @@ export default function Dashboard() {
           border: 1px solid rgba(184,50,50,0.22);
           color: #b83232;
           cursor: pointer;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 8px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -444,7 +444,7 @@ export default function Dashboard() {
         }
 
         .dash-video-main-badge {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 8px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -473,7 +473,7 @@ export default function Dashboard() {
           background: transparent;
           border: none;
           border-bottom: 1px solid rgba(181,135,74,0.4);
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 10px;
           color: #1a1410;
           letter-spacing: 0.05em;
@@ -490,7 +490,7 @@ export default function Dashboard() {
           border: 1px solid rgba(26,20,16,0.16);
           color: #7a6e62;
           cursor: pointer;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 8px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -518,7 +518,7 @@ export default function Dashboard() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           letter-spacing: 0.16em;
           text-transform: uppercase;
@@ -571,7 +571,7 @@ export default function Dashboard() {
           background: none;
           border: none;
           cursor: pointer;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 10px;
           letter-spacing: 0.12em;
           color: #9a8e82;
@@ -596,7 +596,7 @@ export default function Dashboard() {
           background: #1a1410;
           color: #f0e8d8;
           text-decoration: none;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 10px;
           letter-spacing: 0.2em;
           text-transform: uppercase;
@@ -642,18 +642,18 @@ export default function Dashboard() {
         <nav className="dash-nav">
           {/* Logo */}
           <div>
-            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '26px', color: '#1a1410', lineHeight: 1, marginBottom: '3px' }}>
+            <div style={{ fontFamily: "'Italiana', serif", fontSize: '26px', color: '#1a1410', lineHeight: 1, marginBottom: '3px' }}>
               Casa
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{ width: '24px', height: '1px', background: '#b5874a' }} />
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '7px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
+              <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '7px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
             </div>
           </div>
 
           {/* User + logout */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', color: '#9a8e82', letterSpacing: '0.05em' }}>
               {user?.email}
             </span>
             <button className="dash-logout-btn" onClick={handleLogout}>
@@ -665,16 +665,16 @@ export default function Dashboard() {
         {/* ── Stat bar ── */}
         <div className="dash-statbar">
           <div className="dash-stat">
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9a8e82' }}>Galleries</span>
-            <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '26px', color: '#1a1410', lineHeight: 1 }}>{galleries.length}</span>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9a8e82' }}>Galleries</span>
+            <span style={{ fontFamily: "'Italiana', serif", fontSize: '26px', color: '#1a1410', lineHeight: 1 }}>{galleries.length}</span>
           </div>
           <div className="dash-stat">
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9a8e82' }}>Videos uploaded</span>
-            <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '26px', color: '#1a1410', lineHeight: 1 }}>{videoCount}</span>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9a8e82' }}>Videos uploaded</span>
+            <span style={{ fontFamily: "'Italiana', serif", fontSize: '26px', color: '#1a1410', lineHeight: 1 }}>{videoCount}</span>
           </div>
           <div className="dash-stat">
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9a8e82' }}>Storage used</span>
-            <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '26px', color: '#c0b8ae', lineHeight: 1 }}>—</span>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9a8e82' }}>Storage used</span>
+            <span style={{ fontFamily: "'Italiana', serif", fontSize: '26px', color: '#c0b8ae', lineHeight: 1 }}>—</span>
           </div>
         </div>
 
@@ -683,10 +683,10 @@ export default function Dashboard() {
 
           {/* Welcome */}
           <div style={{ marginBottom: '48px' }}>
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '36px', fontWeight: 400, color: '#1a1410', marginBottom: '6px', lineHeight: 1.2 }}>
+            <h1 style={{ fontFamily: "'Italiana', serif", fontSize: '36px', fontWeight: 400, color: '#1a1410', marginBottom: '6px', lineHeight: 1.2 }}>
               {getGreeting(user?.email)}
             </h1>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#9a8e82' }}>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#9a8e82' }}>
               Your galleries
             </p>
           </div>
@@ -696,20 +696,20 @@ export default function Dashboard() {
             <div style={{ background: '#ffffff', boxShadow: '0 1px 4px rgba(26,20,16,0.05)', padding: '80px 40px', textAlign: 'center' }}>
               {/* Logo mark */}
               <div style={{ marginBottom: '32px' }}>
-                <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '52px', color: '#1a1410', lineHeight: 1, marginBottom: '8px' }}>
+                <div style={{ fontFamily: "'Italiana', serif", fontSize: '52px', color: '#1a1410', lineHeight: 1, marginBottom: '8px' }}>
                   Casa
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
                   <div style={{ width: '40px', height: '1px', background: '#b5874a' }} />
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '8px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
+                  <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '8px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
                   <div style={{ width: '40px', height: '1px', background: '#b5874a' }} />
                 </div>
               </div>
 
-              <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '28px', fontWeight: 400, color: '#1a1410', marginBottom: '12px' }}>
+              <h2 style={{ fontFamily: "'Italiana', serif", fontSize: '28px', fontWeight: 400, color: '#1a1410', marginBottom: '12px' }}>
                 No galleries yet
               </h2>
-              <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '15px', color: '#7a6e62', fontWeight: 300, marginBottom: '40px', maxWidth: '380px', margin: '0 auto 40px', lineHeight: 1.7 }}>
+              <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '15px', color: '#7a6e62', fontWeight: 400, marginBottom: '40px', maxWidth: '380px', margin: '0 auto 40px', lineHeight: 1.7 }}>
                 Create your first gallery to start delivering films to your clients in a way they&apos;ll remember.
               </p>
               <a href="/galleries/new" className="dash-empty-btn">
@@ -720,7 +720,7 @@ export default function Dashboard() {
             <>
               {/* Gallery section header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9a8e82' }}>
+                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9a8e82' }}>
                   {galleries.length} {galleries.length === 1 ? 'gallery' : 'galleries'}
                 </p>
                 <a href="/galleries/new" className="dash-btn dash-btn-dark">
@@ -742,10 +742,10 @@ export default function Dashboard() {
                         {gallery.cover_image_url && (
                           <div style={{ marginBottom: '10px', width: '80px', height: '50px', backgroundImage: `url(${gallery.cover_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid rgba(181,135,74,0.2)' }} />
                         )}
-                        <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '21px', fontWeight: 400, color: '#1a1410', marginBottom: '6px', lineHeight: 1.3 }}>
+                        <h3 style={{ fontFamily: "'Italiana', serif", fontSize: '21px', fontWeight: 400, color: '#1a1410', marginBottom: '6px', lineHeight: 1.3 }}>
                           {gallery.name}
                         </h3>
-                        <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.08em', lineHeight: 1.6 }}>
+                        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', color: '#9a8e82', letterSpacing: '0.08em', lineHeight: 1.6 }}>
                           {gallery.client_name}
                           {gallery.client_email && (
                             <span style={{ color: '#c0b8ae' }}> · {gallery.client_email}</span>
@@ -805,10 +805,10 @@ export default function Dashboard() {
                           {gallery._coverUploading ? (
                             <>
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em' }}>
+                                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em' }}>
                                   Uploading cover image…
                                 </span>
-                                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#b5874a' }}>
+                                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', color: '#b5874a' }}>
                                   {gallery._coverProgress ?? 0}%
                                 </span>
                               </div>
@@ -817,7 +817,7 @@ export default function Dashboard() {
                               </div>
                             </>
                           ) : gallery._coverError ? (
-                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#b83232', letterSpacing: '0.08em' }}>
+                            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', color: '#b83232', letterSpacing: '0.08em' }}>
                               Cover upload failed: {gallery._coverError}
                             </p>
                           ) : null}

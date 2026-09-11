@@ -83,7 +83,7 @@ export default function AddVideo(props) {
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@400;500&family=Jost:wght@300;400&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Archivo:wght@500;600&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
       <style>{`
         .av-nav {
@@ -95,7 +95,7 @@ export default function AddVideo(props) {
         }
         .av-logout {
           background: none; border: none; cursor: pointer;
-          font-family: 'DM Mono', monospace; font-size: 10px;
+          font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 10px;
           letter-spacing: 0.12em; text-transform: uppercase;
           color: #9a8e82; transition: color 0.15s;
         }
@@ -116,7 +116,7 @@ export default function AddVideo(props) {
 
         .av-back {
           display: inline-flex; align-items: center; gap: 6px;
-          font-family: 'DM Mono', monospace; font-size: 9px;
+          font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 9px;
           letter-spacing: 0.2em; text-transform: uppercase;
           color: #9a8e82; text-decoration: none;
           margin-bottom: 32px; transition: color 0.15s;
@@ -129,7 +129,7 @@ export default function AddVideo(props) {
           margin-bottom: 24px;
         }
         .av-section-label {
-          font-family: 'DM Mono', monospace; font-size: 9px;
+          font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 9px;
           letter-spacing: 0.26em; text-transform: uppercase;
           color: #b5874a; white-space: nowrap;
         }
@@ -141,7 +141,7 @@ export default function AddVideo(props) {
         .av-field:last-child { margin-bottom: 0; }
         .av-label {
           display: block;
-          font-family: 'DM Mono', monospace; font-size: 9px;
+          font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 9px;
           letter-spacing: 0.22em; text-transform: uppercase;
           color: #9a8e82; margin-bottom: 10px;
         }
@@ -149,11 +149,11 @@ export default function AddVideo(props) {
           width: 100%; background: transparent;
           border: none; border-bottom: 1px solid rgba(26,20,16,0.18);
           padding: 11px 0;
-          font-family: 'Jost', sans-serif; font-size: 16px;
+          font-family: 'Albert Sans', sans-serif; font-size: 16px;
           color: #1a1410; outline: none;
           transition: border-color 0.2s; box-sizing: border-box;
         }
-        .av-input::placeholder { color: rgba(26,20,16,0.28); font-weight: 300; }
+        .av-input::placeholder { color: rgba(26,20,16,0.28); font-weight: 400; }
         .av-input:focus { border-bottom-color: #b5874a; }
 
         .av-drop {
@@ -182,7 +182,7 @@ export default function AddVideo(props) {
           width: 100%; padding: 18px;
           background: #1a1410; color: #f0e8d8;
           border: none; cursor: pointer;
-          font-family: 'DM Mono', monospace; font-size: 11px;
+          font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 11px;
           letter-spacing: 0.22em; text-transform: uppercase;
           transition: background 0.2s; box-sizing: border-box;
         }
@@ -195,13 +195,13 @@ export default function AddVideo(props) {
           margin-bottom: 28px;
         }
         .av-tip-label {
-          font-family: 'DM Mono', monospace; font-size: 9px;
+          font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 9px;
           letter-spacing: 0.2em; text-transform: uppercase;
           color: #b5874a; margin-bottom: 6px;
         }
         .av-tip-body {
-          font-family: 'Jost', sans-serif; font-size: 13px;
-          color: #7a6e62; font-weight: 300; line-height: 1.7;
+          font-family: 'Albert Sans', sans-serif; font-size: 13px;
+          color: #7a6e62; font-weight: 400; line-height: 1.7;
         }
 
         /* ── Video list ── */
@@ -214,7 +214,7 @@ export default function AddVideo(props) {
         }
         .av-video-row:first-child { border-top: 1px solid rgba(26,20,16,0.08); }
         .av-video-num {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           color: #b5874a;
           letter-spacing: 0.08em;
@@ -223,7 +223,7 @@ export default function AddVideo(props) {
         }
         .av-video-name {
           flex: 1;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Albert Sans', sans-serif;
           font-size: 14px;
           color: #1a1410;
           font-weight: 400;
@@ -236,7 +236,7 @@ export default function AddVideo(props) {
           border: 1px solid rgba(184,50,50,0.25);
           color: #b83232;
           cursor: pointer;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -257,13 +257,12 @@ export default function AddVideo(props) {
           padding: 8px 16px; margin-bottom: 40px;
         }
         .av-context-label {
-          font-family: 'DM Mono', monospace; font-size: 9px;
+          font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 9px;
           letter-spacing: 0.2em; text-transform: uppercase;
           color: #9a8e82;
         }
         .av-context-name {
-          font-family: 'Playfair Display', Georgia, serif;
-          font-style: italic; font-size: 16px; color: #1a1410;
+          font-family: 'Italiana', serif; font-size: 16px; color: #1a1410;
         }
 
         @media (max-width: 768px) {
@@ -279,16 +278,16 @@ export default function AddVideo(props) {
         {/* ── Navigation ── */}
         <nav className="av-nav">
           <div>
-            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '26px', color: '#1a1410', lineHeight: 1, marginBottom: '3px' }}>
+            <div style={{ fontFamily: "'Italiana', serif", fontSize: '26px', color: '#1a1410', lineHeight: 1, marginBottom: '3px' }}>
               Casa
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{ width: '24px', height: '1px', background: '#b5874a' }} />
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '7px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
+              <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '7px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', color: '#9a8e82', letterSpacing: '0.05em' }}>
               {user?.email}
             </span>
             <button className="av-logout" onClick={handleLogout}>Log out</button>
@@ -308,10 +307,10 @@ export default function AddVideo(props) {
           )}
 
           <div style={{ marginBottom: '48px' }}>
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '40px', fontWeight: 400, color: '#1a1410', lineHeight: 1.2, marginBottom: '8px' }}>
+            <h1 style={{ fontFamily: "'Italiana', serif", fontSize: '40px', fontWeight: 400, color: '#1a1410', lineHeight: 1.2, marginBottom: '8px' }}>
               Add a film
             </h1>
-            <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '15px', color: '#7a6e62', fontWeight: 300 }}>
+            <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '15px', color: '#7a6e62', fontWeight: 400 }}>
               Upload an additional film to this gallery
             </p>
           </div>
@@ -391,19 +390,19 @@ export default function AddVideo(props) {
 
                   {video ? (
                     <>
-                      <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#b5874a', letterSpacing: '0.06em', marginBottom: '5px' }}>
+                      <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '11px', color: '#b5874a', letterSpacing: '0.06em', marginBottom: '5px' }}>
                         {video.name}
                       </p>
-                      <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#9a8e82', fontWeight: 300 }}>
+                      <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '12px', color: '#9a8e82', fontWeight: 400 }}>
                         {formatFileSize(video.size)} · Click or drop to change
                       </p>
                     </>
                   ) : (
                     <>
-                      <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#7a6e62', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                      <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '11px', color: '#7a6e62', letterSpacing: '0.06em', marginBottom: '6px' }}>
                         Drop your video here or click to browse
                       </p>
-                      <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: '#b0a898', fontWeight: 300 }}>
+                      <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '12px', color: '#b0a898', fontWeight: 400 }}>
                         MP4, MOV, MKV · up to 5 GB · resumable upload
                       </p>
                     </>
@@ -419,14 +418,14 @@ export default function AddVideo(props) {
                 />
 
                 {video && (
-                  <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em', marginTop: '12px' }}>
+                  <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', color: '#9a8e82', letterSpacing: '0.1em', marginTop: '12px' }}>
                     Upload will run in the background — you can navigate freely.
                   </p>
                 )}
               </div>
 
               {message && (
-                <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#b83232', marginBottom: '24px', lineHeight: 1.5 }}>
+                <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '13px', color: '#b83232', marginBottom: '24px', lineHeight: 1.5 }}>
                   {message}
                 </p>
               )}
@@ -444,7 +443,7 @@ export default function AddVideo(props) {
             {/* ── Tips ── */}
             <div className="av-tips-col">
               <div style={{ marginBottom: '32px' }}>
-                <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '20px', color: '#1a1410', marginBottom: '8px', lineHeight: 1.3 }}>
+                <p style={{ fontFamily: "'Italiana', serif", fontSize: '20px', color: '#1a1410', marginBottom: '8px', lineHeight: 1.3 }}>
                   A few helpful notes
                 </p>
                 <div style={{ width: '28px', height: '1px', background: '#b5874a' }} />

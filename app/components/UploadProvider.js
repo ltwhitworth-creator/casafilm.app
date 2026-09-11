@@ -184,7 +184,7 @@ function UploadCard({ job, onCancel }) {
         )}
         <span style={{
           flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '0.05em',
+          fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '11px', letterSpacing: '0.05em',
           color: 'rgba(240,232,216,0.65)',
         }}>{job.filename}</span>
         {!isComplete && (
@@ -218,7 +218,7 @@ function UploadCard({ job, onCancel }) {
       {/* Status + percentage */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontFamily: "'DM Mono', monospace", fontSize: '10px',
+        fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px',
         letterSpacing: '0.14em', textTransform: 'uppercase',
       }}>
         <span style={{

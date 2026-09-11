@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { supabase } from '../lib/supabase'
 
 const FEATURES = [
@@ -33,7 +34,7 @@ export default function SignUp() {
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@400;500&family=Jost:wght@300;400&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Archivo:wght@500;600&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
       <style>{`
         .cf-layout {
@@ -79,7 +80,7 @@ export default function SignUp() {
           border: none;
           border-bottom: 1px solid #c8bfb0;
           padding: 12px 0;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Albert Sans', sans-serif;
           font-size: 16px;
           color: #1a1410;
           outline: none;
@@ -88,7 +89,7 @@ export default function SignUp() {
         }
         .cf-input::placeholder {
           color: #b8ae9e;
-          font-weight: 300;
+          font-weight: 400;
         }
         .cf-input:focus {
           border-bottom-color: #b5874a;
@@ -102,9 +103,10 @@ export default function SignUp() {
           color: #f0e8d8;
           border: none;
           cursor: pointer;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Albert Sans', sans-serif;
+          font-weight: 600;
           font-size: 11px;
-          letter-spacing: 0.22em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           transition: background 0.2s;
           box-sizing: border-box;
@@ -143,18 +145,18 @@ export default function SignUp() {
           <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '360px' }}>
 
             {/* Logo */}
-            <div style={{ marginBottom: '56px' }}>
-              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '76px', color: '#f0e8d8', lineHeight: 1, marginBottom: '10px', letterSpacing: '-0.01em' }}>
+            <Link href="/" style={{ display: 'block', marginBottom: '56px', textDecoration: 'none' }}>
+              <div style={{ fontFamily: "'Italiana', serif", fontSize: '76px', color: '#f0e8d8', lineHeight: 1, marginBottom: '10px', letterSpacing: '-0.01em' }}>
                 Casa
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ flex: 1, height: '1px', background: '#b5874a' }} />
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.55em', textTransform: 'uppercase', color: '#b5874a', paddingRight: '2px' }}>Film</span>
+                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.55em', textTransform: 'uppercase', color: '#b5874a', paddingRight: '2px' }}>Film</span>
               </div>
-            </div>
+            </Link>
 
             {/* Tagline */}
-            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '23px', color: '#c4b49a', lineHeight: 1.55, marginBottom: '52px' }}>
+            <p style={{ fontFamily: "'Italiana', serif", fontSize: '23px', color: '#c4b49a', lineHeight: 1.55, marginBottom: '52px' }}>
               A home for your finest work.
             </p>
 
@@ -164,10 +166,10 @@ export default function SignUp() {
                 <div key={title} style={{ display: 'flex', gap: '18px', alignItems: 'flex-start' }}>
                   <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#b5874a', marginTop: '7px', flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '0.13em', textTransform: 'uppercase', color: '#f0e8d8', marginBottom: '5px' }}>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.13em', textTransform: 'uppercase', color: '#f0e8d8', marginBottom: '5px' }}>
                       {title}
                     </div>
-                    <div style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#6e6358', fontWeight: 300, lineHeight: 1.6 }}>
+                    <div style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '13px', color: '#6e6358', fontWeight: 400, lineHeight: 1.6 }}>
                       {desc}
                     </div>
                   </div>
@@ -182,18 +184,18 @@ export default function SignUp() {
         <div className="cf-right">
           <div style={{ width: '100%', maxWidth: '380px' }}>
 
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#b5874a', marginBottom: '14px' }}>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#b5874a', marginBottom: '14px' }}>
               Get started
             </p>
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '38px', fontWeight: 400, color: '#1a1410', lineHeight: 1.2, marginBottom: '10px' }}>
+            <h1 style={{ fontFamily: "'Italiana', serif", fontSize: '38px', fontWeight: 400, color: '#1a1410', lineHeight: 1.2, marginBottom: '10px' }}>
               Create your account
             </h1>
-            <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '15px', color: '#7a6e62', fontWeight: 300, marginBottom: '48px' }}>
+            <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '15px', color: '#7a6e62', fontWeight: 400, marginBottom: '48px' }}>
               Start delivering films your clients will love.
             </p>
 
             <div style={{ marginBottom: '32px' }}>
-              <label style={{ display: 'block', fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#9a8e82', marginBottom: '10px' }}>
+              <label style={{ display: 'block', fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#9a8e82', marginBottom: '10px' }}>
                 Email address
               </label>
               <input
@@ -207,7 +209,7 @@ export default function SignUp() {
             </div>
 
             <div style={{ marginBottom: '44px' }}>
-              <label style={{ display: 'block', fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#9a8e82', marginBottom: '10px' }}>
+              <label style={{ display: 'block', fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#9a8e82', marginBottom: '10px' }}>
                 Password
               </label>
               <input
@@ -221,7 +223,7 @@ export default function SignUp() {
             </div>
 
             {message && (
-              <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: success ? '#b5874a' : '#c0392b', lineHeight: 1.5, marginBottom: '24px' }}>
+              <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '13px', color: success ? '#b5874a' : '#c0392b', lineHeight: 1.5, marginBottom: '24px' }}>
                 {message}
               </p>
             )}
@@ -230,12 +232,12 @@ export default function SignUp() {
               {loading ? 'Creating account…' : 'Create Account'}
             </button>
 
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.12em', color: '#b0a898', textAlign: 'center', marginTop: '14px' }}>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.12em', color: '#b0a898', textAlign: 'center', marginTop: '14px' }}>
               No credit card required
             </p>
 
             <div style={{ marginTop: '52px', paddingTop: '32px', borderTop: '1px solid #ddd5c8', textAlign: 'center' }}>
-              <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '14px', color: '#9a8e82', fontWeight: 300 }}>
+              <p style={{ fontFamily: "'Albert Sans', sans-serif", fontSize: '14px', color: '#9a8e82', fontWeight: 400 }}>
                 Already have an account?{' '}
                 <a href="/login" style={{ color: '#b5874a', textDecoration: 'none', fontWeight: 400 }}>
                   Sign in

@@ -6,7 +6,7 @@ const FONTS = (
   <>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@400;500&family=Jost:wght@300;400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Archivo:wght@500;600&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </>
 )
 
@@ -103,12 +103,12 @@ export default function GalleryPage(props) {
         {FONTS}
         <div style={{ minHeight: '100vh', background: '#1a1410', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '44px', color: '#f0e8d8', lineHeight: 1, marginBottom: '10px' }}>
+            <div style={{ fontFamily: "'Italiana', serif", fontSize: '44px', color: '#f0e8d8', lineHeight: 1, marginBottom: '10px' }}>
               Casa
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
               <div style={{ width: '32px', height: '1px', background: '#b5874a' }} />
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '8px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
+              <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '8px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
             </div>
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function GalleryPage(props) {
       <>
         {FONTS}
         <div style={{ minHeight: '100vh', background: '#1a1410', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '0.2em', color: '#444', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '11px', letterSpacing: '0.2em', color: '#444', textTransform: 'uppercase' }}>
             Gallery not found
           </p>
         </div>
@@ -148,17 +148,17 @@ export default function GalleryPage(props) {
           .gp-input {
             width: 100%; background: transparent; border: none;
             border-bottom: 1px solid rgba(240,232,216,0.18); padding: 16px 0;
-            font-family: 'Jost', sans-serif; font-size: 17px; color: #f0e8d8;
+            font-family: 'Albert Sans', sans-serif; font-size: 17px; color: #f0e8d8;
             text-align: center; letter-spacing: 0.18em; outline: none;
             transition: border-color 0.25s; box-sizing: border-box;
           }
-          .gp-input::placeholder { color: rgba(240,232,216,0.2); font-weight: 300; letter-spacing: 0.1em; }
+          .gp-input::placeholder { color: rgba(240,232,216,0.2); font-weight: 400; letter-spacing: 0.1em; }
           .gp-input:focus { border-bottom-color: #b5874a; }
           .gp-btn {
             width: 100%; padding: 20px; background: #b5874a; color: #1a1410;
-            border: none; cursor: pointer; font-family: 'DM Mono', monospace;
+            border: none; cursor: pointer; font-family: 'Archivo', sans-serif; font-weight: 600;
             font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
-            font-weight: 500; transition: background 0.2s; box-sizing: border-box;
+            transition: background 0.2s; box-sizing: border-box;
           }
           .gp-btn:hover { background: #d4a865; }
           .gp-btn:active { background: #a07840; }
@@ -171,16 +171,16 @@ export default function GalleryPage(props) {
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-55%)', width: '800px', height: '700px', background: 'radial-gradient(ellipse at center, rgba(181,135,74,0.11) 0%, rgba(181,135,74,0.04) 40%, transparent 70%)', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '440px', textAlign: 'center' }}>
             <div style={{ marginBottom: '72px' }}>
-              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '52px', color: '#f0e8d8', lineHeight: 1, marginBottom: '10px' }}>Casa</div>
+              <div style={{ fontFamily: "'Italiana', serif", fontSize: '52px', color: '#f0e8d8', lineHeight: 1, marginBottom: '10px' }}>Casa</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ flex: 1, height: '1px', background: '#b5874a' }} />
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.55em', textTransform: 'uppercase', color: '#b5874a', paddingRight: '2px' }}>Film</span>
+                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.55em', textTransform: 'uppercase', color: '#b5874a', paddingRight: '2px' }}>Film</span>
               </div>
             </div>
-            <h1 className="gp-name" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '52px', fontWeight: 400, color: '#f0e8d8', lineHeight: 1.15, marginBottom: '16px', letterSpacing: '-0.01em' }}>
+            <h1 className="gp-name" style={{ fontFamily: "'Italiana', serif", fontSize: '52px', fontWeight: 400, color: '#f0e8d8', lineHeight: 1.15, marginBottom: '16px', letterSpacing: '-0.01em' }}>
               {gallery.name}
             </h1>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#b5874a', marginBottom: 0 }}>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#b5874a', marginBottom: 0 }}>
               A film for {gallery.client_name}
             </p>
             <div style={{ width: '100%', height: '1px', background: 'linear-gradient(to right, transparent, rgba(181,135,74,0.4), transparent)', margin: '44px 0' }} />
@@ -194,7 +194,7 @@ export default function GalleryPage(props) {
               autoFocus
             />
             {error && (
-              <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '0.1em', color: '#c0523a', marginTop: '16px', marginBottom: 0 }}>
+              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.1em', color: '#c0523a', marginTop: '16px', marginBottom: 0 }}>
                 {error}
               </p>
             )}
@@ -245,18 +245,17 @@ export default function GalleryPage(props) {
           animation: gc-preview-pulse 2.8s ease-in-out infinite;
         }
         .gc-preview-text {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 13px;
           letter-spacing: 0.28em;
           text-transform: uppercase;
           color: #1a1410;
-          font-weight: 500;
           display: flex;
           align-items: center;
           gap: 10px;
         }
         .gc-preview-back {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 11px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
@@ -264,7 +263,6 @@ export default function GalleryPage(props) {
           text-decoration: none;
           transition: color 0.15s;
           white-space: nowrap;
-          font-weight: 500;
         }
         .gc-preview-back:hover { color: #1a1410; }
 
@@ -345,8 +343,7 @@ export default function GalleryPage(props) {
         }
 
         .gc-hero-title {
-          font-family: 'Playfair Display', Georgia, serif;
-          font-style: italic;
+          font-family: 'Italiana', serif;
           font-size: 80px;
           font-weight: 400;
           color: #f0e8d8;
@@ -357,7 +354,7 @@ export default function GalleryPage(props) {
         }
 
         .gc-hero-tagline {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 10px;
           letter-spacing: 0.45em;
           text-transform: uppercase;
@@ -377,7 +374,7 @@ export default function GalleryPage(props) {
           padding: 32px 40px 18px;
         }
         .gc-now-playing-label {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           letter-spacing: 0.36em;
           text-transform: uppercase;
@@ -385,8 +382,7 @@ export default function GalleryPage(props) {
           margin-bottom: 7px;
         }
         .gc-now-playing-title {
-          font-family: 'Playfair Display', Georgia, serif;
-          font-style: italic;
+          font-family: 'Italiana', serif;
           font-size: 30px;
           font-weight: 400;
           color: #f0e8d8;
@@ -447,7 +443,7 @@ export default function GalleryPage(props) {
           margin-bottom: 24px;
         }
         .gc-playlist-label {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           letter-spacing: 0.4em;
           text-transform: uppercase;
@@ -515,7 +511,7 @@ export default function GalleryPage(props) {
         }
 
         .gc-card-title {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           letter-spacing: 0.2em;
           text-transform: uppercase;
@@ -543,7 +539,7 @@ export default function GalleryPage(props) {
           gap: 32px;
         }
         .gc-detail-label {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 9px;
           letter-spacing: 0.3em;
           text-transform: uppercase;
@@ -551,7 +547,7 @@ export default function GalleryPage(props) {
           margin-bottom: 5px;
         }
         .gc-detail-value {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 11px;
           letter-spacing: 0.1em;
           color: rgba(240,232,216,0.5);
@@ -565,11 +561,10 @@ export default function GalleryPage(props) {
           color: #1a1410;
           border: none;
           cursor: pointer;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 11px;
           letter-spacing: 0.32em;
           text-transform: uppercase;
-          font-weight: 500;
           transition: background 0.2s, color 0.2s;
           white-space: nowrap;
           flex-shrink: 0;
@@ -587,7 +582,7 @@ export default function GalleryPage(props) {
           border-top: 1px solid rgba(181,135,74,0.05);
         }
         .gc-footer a {
-          font-family: 'DM Mono', monospace;
+          font-family: 'Archivo', sans-serif; font-weight: 600;
           font-size: 8px;
           letter-spacing: 0.4em;
           text-transform: uppercase;
@@ -660,12 +655,12 @@ export default function GalleryPage(props) {
 
         {/* Logo */}
         <div className="gc-hero-logo">
-          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '28px', color: '#f0e8d8', lineHeight: 1, marginBottom: '6px' }}>
+          <div style={{ fontFamily: "'Italiana', serif", fontSize: '28px', color: '#f0e8d8', lineHeight: 1, marginBottom: '6px' }}>
             Casa
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
             <div style={{ flex: 1, height: '1px', background: '#b5874a' }} />
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '7px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '7px', letterSpacing: '0.5em', color: '#b5874a', textTransform: 'uppercase' }}>Film</span>
           </div>
         </div>
 
@@ -708,10 +703,10 @@ export default function GalleryPage(props) {
               ))}
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '500px', height: '300px', background: 'radial-gradient(ellipse, rgba(181,135,74,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', textAlign: 'center', padding: '0 40px' }}>
-                <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: '32px', fontWeight: 400, color: 'rgba(240,232,216,0.5)', lineHeight: 1.3, marginBottom: '18px' }}>
+                <p style={{ fontFamily: "'Italiana', serif", fontSize: '32px', fontWeight: 400, color: 'rgba(240,232,216,0.5)', lineHeight: 1.3, marginBottom: '18px' }}>
                   Your film is being prepared
                 </p>
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(181,135,74,0.4)' }}>
+                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(181,135,74,0.4)' }}>
                   We'll be in touch very soon
                 </p>
               </div>
