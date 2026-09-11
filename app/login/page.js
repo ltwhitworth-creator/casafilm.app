@@ -40,14 +40,14 @@ export default function Login() {
           min-height: 100vh;
         }
 
-        /* ── Left dark panel ── */
+        /* ── Left dark panel (1/3 width) ── */
         .cf-left {
           flex: 1;
           background: #1a1410;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 64px 56px;
+          padding: 64px 40px;
           position: relative;
           overflow: hidden;
         }
@@ -61,9 +61,9 @@ export default function Login() {
           pointer-events: none;
         }
 
-        /* ── Right form panel ── */
+        /* ── Right form panel (2/3 width) ── */
         .cf-right {
-          flex: 1;
+          flex: 2;
           background: #f5f0e8;
           display: flex;
           align-items: center;
@@ -117,8 +117,8 @@ export default function Login() {
           cursor: not-allowed;
         }
 
-        /* ── Mobile ── */
-        @media (max-width: 768px) {
+        /* ── Mobile/tablet: stack before the 1/3 column gets too cramped ── */
+        @media (max-width: 900px) {
           .cf-layout {
             flex-direction: column;
           }
@@ -140,7 +140,7 @@ export default function Login() {
 
         {/* ── Left panel ── */}
         <div className="cf-left">
-          <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '360px' }}>
+          <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '320px' }}>
 
             {/* Logo */}
             <Link href="/" style={{ display: 'block', marginBottom: '56px', textDecoration: 'none' }}>
@@ -180,7 +180,7 @@ export default function Login() {
 
         {/* ── Right panel ── */}
         <div className="cf-right">
-          <div style={{ width: '100%', maxWidth: '380px' }}>
+          <div style={{ width: '100%', maxWidth: '440px' }}>
 
             <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#b5874a', marginBottom: '14px' }}>
               Welcome back
